@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A2/Chat-Client-Oneway" />
+            <option value="$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A2/Chat-Client-Oneway/app" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
