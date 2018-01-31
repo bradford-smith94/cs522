@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 		// TODO check if there is saved UI state, and if so, restore it (i.e. the cart contents)
 
 		// TODO Set the layout (use cart.xml layout)
+        setContentView(R.layout.cart);
 
 		// TODO use an array adapter to display the cart contents.
 
@@ -42,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		// TODO inflate a menu with ADD and CHECKOUT options
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bookstore_menu, menu);
 
         return true;
 	}
@@ -52,14 +55,14 @@ public class MainActivity extends AppCompatActivity {
 		super.onOptionsItemSelected(item);
         switch(item.getItemId()) {
 
-            // TODO ADD provide the UI for adding a book
             case R.id.add:
-                // Intent addIntent = new Intent(this, AddBookActivity.class);
-                // startActivityForResult(addIntent, ADD_REQUEST);
+                Intent addIntent = new Intent(this, AddBookActivity.class);
+                startActivityForResult(addIntent, ADD_REQUEST);
                 break;
 
-            // TODO CHECKOUT provide the UI for checking out
             case R.id.checkout:
+            	Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
+            	startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
             default:
@@ -71,21 +74,21 @@ public class MainActivity extends AppCompatActivity {
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
-		// TODO Handle results from the Search and Checkout activities.
 
         // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
         switch(requestCode) {
             case ADD_REQUEST:
-                // ADD: add the book that is returned to the shopping cart.
+                // TODO ADD: add the book that is returned to the shopping cart.
                 break;
             case CHECKOUT_REQUEST:
-                // CHECKOUT: empty the shopping cart.
+                // TODO CHECKOUT: empty the shopping cart.
                 break;
         }
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
+	    super.onSaveInstanceState(savedInstanceState);
 		// TODO save the shopping cart contents (which should be a list of parcelables).
 		
 	}

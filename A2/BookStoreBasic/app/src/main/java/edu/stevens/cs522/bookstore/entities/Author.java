@@ -13,6 +13,9 @@ public class Author implements Parcelable {
 	
 	public String lastName;
 
+	public Author() {
+    }
+
 	protected Author(Parcel in) {
 		firstName = in.readString();
 		middleInitial = in.readString();
