@@ -1,8 +1,9 @@
 package edu.stevens.cs522.bookstore.entities;
 
-public class Author {
-	
-	// TODO Modify this to implement the Parcelable interface.
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Author implements Parcelable {
 
 	// NOTE: middleInitial may be NULL!
 	
@@ -11,6 +12,24 @@ public class Author {
 	public String middleInitial;
 	
 	public String lastName;
+
+	protected Author(Parcel in) {
+		firstName = in.readString();
+		middleInitial = in.readString();
+		lastName = in.readString();
+	}
+
+	public static final Creator<Author> CREATOR = new Creator<Author>() {
+		@Override
+		public Author createFromParcel(Parcel in) {
+			return new Author(in);
+		}
+
+		@Override
+		public Author[] newArray(int size) {
+			return new Author[size];
+		}
+	};
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
@@ -28,4 +47,15 @@ public class Author {
 		return sb.toString();
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(firstName);
+		dest.writeString(middleInitial);
+		dest.writeString(lastName);
+	}
 }
