@@ -16,6 +16,14 @@ public class Author implements Parcelable {
 	public Author() {
     }
 
+	public Author(String name) {
+		String[] names = name.split("\\s+");
+		this.firstName = names[0];
+		if (names.length > 2)
+		    this.middleInitial = String.valueOf(names[1].charAt(0));
+		this.lastName = names[names.length - 1];
+    }
+
 	protected Author(Parcel in) {
 		firstName = in.readString();
 		middleInitial = in.readString();

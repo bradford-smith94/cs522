@@ -1,10 +1,12 @@
 package edu.stevens.cs522.bookstore.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import edu.stevens.cs522.bookstore.R;
 
@@ -31,10 +33,18 @@ public class CheckoutActivity extends AppCompatActivity {
 		super.onOptionsItemSelected(item);
 		switch(item.getItemId()) {
 			case R.id.order:
-				// TODO ORDER: display a toast message of how many books have been ordered and return
+				// ORDER: display a toast message of how many books have been ordered and return
+				Context context = getApplicationContext();
+				int numBooks = (int)getIntent().getSerializableExtra("shopping_cart_num");
+				String text = new String("Sent order for " + numBooks + " books");
+				Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+				toast.show();
+				setResult(RESULT_OK);
+                finish();
 				break;
 			case R.id.cancel:
-				// TODO CANCEL: just return with REQUEST_CANCELED as the result code
+                setResult(RESULT_CANCELED);
+				finish();
 				break;
 
 			default:

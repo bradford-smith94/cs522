@@ -32,8 +32,9 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 
 		// TODO check if there is saved UI state, and if so, restore it (i.e. the cart contents)
+        shoppingCart = new ArrayList<Book>();
 
-		// TODO Set the layout (use cart.xml layout)
+		// Set the layout (use cart.xml layout)
         setContentView(R.layout.cart);
 
 		// TODO use an array adapter to display the cart contents.
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.checkout:
             	Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
+            	checkoutIntent.putExtra("shopping_cart_num", shoppingCart.size());
             	startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
@@ -79,9 +81,12 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case ADD_REQUEST:
                 // TODO ADD: add the book that is returned to the shopping cart.
+				Book book = (Book)intent.getSerializableExtra("book_result");
+                shoppingCart.add(book);
                 break;
             case CHECKOUT_REQUEST:
-                // TODO CHECKOUT: empty the shopping cart.
+                // CHECKOUT: empty the shopping cart.
+                shoppingCart.clear();
                 break;
         }
 	}
