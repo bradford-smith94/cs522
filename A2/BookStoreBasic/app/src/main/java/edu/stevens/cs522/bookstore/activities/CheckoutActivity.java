@@ -12,6 +12,8 @@ import edu.stevens.cs522.bookstore.R;
 
 public class CheckoutActivity extends AppCompatActivity {
 
+	public static final String BOOK_NUM_KEY = "num_books";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,8 +37,12 @@ public class CheckoutActivity extends AppCompatActivity {
 			case R.id.order:
 				// ORDER: display a toast message of how many books have been ordered and return
 				Context context = getApplicationContext();
-				int numBooks = (int)getIntent().getSerializableExtra("shopping_cart_num");
-				String text = new String("Sent order for " + numBooks + " books");
+				int numBooks = (int)getIntent().getSerializableExtra(BOOK_NUM_KEY);
+				String text;
+				if (numBooks > 0)
+                    text = String.format(getString(R.string.checkoutMessage), numBooks);
+				else
+				    text = getString(R.string.checkoutEmptyMessage);
 				Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
 				toast.show();
 				setResult(RESULT_OK);

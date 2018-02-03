@@ -35,6 +35,9 @@ public class Book implements Parcelable {
 	protected Book(Parcel in) {
 		id = in.readInt();
 		title = in.readString();
+		int size = in.readInt();
+		authors = new Author[size];
+		in.readTypedArray(authors, Author.CREATOR);
 		isbn = in.readString();
 		price = in.readString();
 	}
@@ -68,6 +71,8 @@ public class Book implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(id);
 		dest.writeString(title);
+		dest.writeInt(authors.length);
+		dest.writeTypedArray(authors, flags);
 		dest.writeString(isbn);
 		dest.writeString(price);
 	}
