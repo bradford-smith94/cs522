@@ -13,6 +13,10 @@ package edu.stevens.cs522.chatserver;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -39,8 +43,11 @@ public class ChatServer extends Activity implements OnClickListener {
 	private boolean socketOK = true; 
 
 	/*
-	 * TODO: Declare a listview for messages, and an adapter for displaying messages.
+	 * Declare a listview for messages, and an adapter for displaying messages.
 	 */
+	ListView listView;
+	List messages;
+	ArrayAdapter adapter;
 
 	Button next;
 
@@ -72,8 +79,13 @@ public class ChatServer extends Activity implements OnClickListener {
 		}
 
 		/*
-		 * TODO: Initialize the UI.
+		 * Initialize the UI.
 		 */
+		listView = findViewById(R.id.msgList);
+		messages = new ArrayList<String>();
+		adapter = new ArrayAdapter<String>(this, R.layout.message, messages);
+		listView.setAdapter(adapter);
+		next = findViewById(R.id.next);
 
 	}
 
@@ -92,8 +104,19 @@ public class ChatServer extends Activity implements OnClickListener {
 			Log.i(TAG, "Source IP Address: " + sourceIPAddress);
 			
 			/*
-			 * TODO: Extract sender and receiver from message and display.
+			 * Extract sender and receiver from message and display.
 			 */
+			receiveData = receivePacket.getData();
+			int count;
+			for (count = 0; receiveData[count] != 0; count++);
+			byte[] nameBytes = new byte[count];
+			for (int i = 0; i < count; i++) {
+			    nameBytes[i] = receiveData[i];
+            }
+            String name = new String(nameBytes, StandardCharsets.UTF_8);
+			String message = new String(Arrays.copyOfRange(receiveData, count, 1024), StandardCharsets.UTF_8);
+			messages.add(String.format(getString(R.string.message_template), name, message));
+			adapter.notifyDataSetChanged();
 
 		} catch (Exception e) {
 			

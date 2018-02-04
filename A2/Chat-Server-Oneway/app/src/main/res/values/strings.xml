@@ -15,4 +15,6 @@
     <string name="send_label">SEND</string>
     <string name="next_label">NEXT</string>
     <string name="menu_show_peers">SHOW PEERS</string>
+
+    <string name="message_template" formatted="false">[%s] says: %s</string>
 </resources>

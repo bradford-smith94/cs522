@@ -15,6 +15,7 @@
           	android:layout_width="0dp"
         	android:layout_weight="0.5"
             android:text="@string/destination_host"
+			android:labelFor="@+id/destination_host"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -38,6 +39,7 @@
          	android:layout_width="0dp"
         	android:layout_weight="0.5"
             android:text="@string/destination_port"
+            android:labelFor="@+id/destination_port"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -65,14 +67,15 @@
             android:inputType="text"
             android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceMedium"  />
-            
+
         <Button
-        	android:id="@+id/send_button"
-        	android:layout_height="wrap_content"
-        	android:layout_width="0dp"
-        	android:layout_weight="0.3"
-        	android:text="@string/send_label"
-            android:textAppearance="?android:attr/textAppearanceMedium"  />
+            android:id="@+id/send_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:onClick="onClick"
+            android:text="@string/send_label"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     </LinearLayout>
 

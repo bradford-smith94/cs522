@@ -94,7 +94,11 @@ public class ChatClient extends Activity implements OnClickListener {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build(); 
 		StrictMode.setThreadPolicy(policy);
 
-		// TODO initialize the UI.
+		// initialize the UI.
+		destinationHost = findViewById(R.id.destination_host);
+		destinationPort = findViewById(R.id.destination_port);
+		messageText = findViewById(R.id.message_text);
+		sendButton = findViewById(R.id.send_button);
 
 
 		try {
@@ -125,7 +129,18 @@ public class ChatClient extends Activity implements OnClickListener {
 			
 			byte[] sendData;  // Combine sender and message text; default encoding is UTF-8
 			
-			// TODO get data from UI
+			// get data from UI
+            destAddr = InetAddress.getByName(String.valueOf(destinationHost.getText()));
+            destPort = Integer.parseInt(String.valueOf(destinationPort.getText()));
+            sendData = new byte[messageText.getText().length() + clientName.length() + 1];
+            int i = 0;
+            for (int j = 0; j < clientName.length(); j++) {
+                sendData[i++] = clientName.getBytes("UTF-8")[j];
+            }
+            sendData[i++] = 0;
+            for (int j = 0; j < messageText.getText().length(); j++) {
+                sendData[i++] = String.valueOf(messageText.getText()).getBytes("UTF-8")[j];
+            }
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData,
 					sendData.length, destAddr, destPort);
