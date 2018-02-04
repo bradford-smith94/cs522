@@ -8,7 +8,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import java.util.Arrays;
+import java.util.List;
+
 import edu.stevens.cs522.bookstore.R;
+import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
 
 public class AddBookActivity extends AppCompatActivity {
@@ -62,7 +66,15 @@ public class AddBookActivity extends AppCompatActivity {
         editText = findViewById(R.id.search_isbn);
         String isbn = editText.getText().toString();
 
-        return new Book(title, author, isbn);
+        // support multiple authors separated by commas
+        List<String> authorList = Arrays.asList(author.split(","));
+        Author[] authors = new Author[authorList.size()];
+        for (int i = 0; i < authorList.size(); i++) {
+            authors[i] = new Author(authorList.get(i).trim());
+        }
+
+        // just ignoring id and price for now
+        return new Book(0, title, authors, isbn, null);
 	}
 
 }

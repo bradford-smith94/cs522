@@ -25,7 +25,20 @@ public class ViewBookActivity extends Activity {
         TextView textView = findViewById(R.id.view_title);
         textView.setText(book.title);
         textView = findViewById(R.id.view_author);
-        textView.setText(book.getFirstAuthor().toString());
+        if (book.authors.length > 1) {
+            StringBuffer authorString = new StringBuffer();
+            int i;
+            for (i = 0; i < book.authors.length - 2; i++) {
+                authorString.append(book.authors[i].toString());
+                authorString.append(", ");
+            }
+            authorString.append(book.authors[i++].toString());
+            authorString.append(" and ");
+            authorString.append(book.authors[i].toString());
+            textView.setText(authorString);
+        } else {
+            textView.setText(book.getFirstAuthor().toString());
+        }
         textView = findViewById(R.id.view_isbn);
         textView.setText(book.isbn);
 	}

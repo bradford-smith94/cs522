@@ -36,7 +36,20 @@ public class BooksAdapter extends ArrayAdapter<Book> {
         TextView author = (TextView) convertView.findViewById(R.id.cart_row_author);
         // Populate the data into the template view using the data object
         title.setText(book.title);
-        author.setText(book.getFirstAuthor());
+        if (book.authors.length > 1) {
+            StringBuffer authorString = new StringBuffer();
+            int i;
+            for (i = 0; i < book.authors.length - 2; i++) {
+                authorString.append(book.authors[i].toString());
+                authorString.append(", ");
+            }
+            authorString.append(book.authors[i++].toString());
+            authorString.append(" and ");
+            authorString.append(book.authors[i].toString());
+            author.setText(authorString);
+        } else {
+            author.setText(book.getFirstAuthor());
+        }
         // Return the completed view to render on screen
         return convertView;
     }
