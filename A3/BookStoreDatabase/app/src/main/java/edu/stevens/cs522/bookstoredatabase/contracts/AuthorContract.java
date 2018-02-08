@@ -28,7 +28,7 @@ public class AuthorContract implements BaseColumns {
 
     public static String getFirstName(Cursor cursor) {
         if (firstNameColumn < 0) {
-            firstNameColumn =  cursor.getColumnIndexOrThrow(FIRST_NAME);;
+            firstNameColumn =  cursor.getColumnIndexOrThrow(FIRST_NAME);
         }
         return cursor.getString(firstNameColumn);
     }
@@ -37,6 +37,30 @@ public class AuthorContract implements BaseColumns {
         values.put(FIRST_NAME, firstName);
     }
 
-    // TODO complete the definitions of the other operations
+    private static int middleInitialColumn = -1;
+
+    public static String getMiddleInitial(Cursor cursor) {
+        if (middleInitialColumn < 0) {
+            middleInitialColumn = cursor.getColumnIndexOrThrow(MIDDLE_INITIAL);
+        }
+        return cursor.getString(middleInitialColumn);
+    }
+
+    public static void putMiddleInitial(ContentValues values, String middleInitial) {
+        values.put(MIDDLE_INITIAL, middleInitial);
+    }
+
+    private static int lastNameColumn = -1;
+
+    public static String getLastName(Cursor cursor) {
+        if (lastNameColumn < 0) {
+            lastNameColumn = cursor.getColumnIndexOrThrow(LAST_NAME);
+        }
+        return cursor.getString(lastNameColumn);
+    }
+
+    public static void putLastName(ContentValues values, String lastName) {
+        values.put(LAST_NAME, lastName);
+    }
 
 }

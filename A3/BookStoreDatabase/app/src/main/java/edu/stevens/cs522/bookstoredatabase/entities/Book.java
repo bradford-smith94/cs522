@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import edu.stevens.cs522.bookstoredatabase.contracts.BookContract;
+
 public class Book implements Parcelable {
 
     public long id;
@@ -68,11 +70,28 @@ public class Book implements Parcelable {
     }
 
     public Book(Cursor cursor) {
-        // TODO init from cursor
+        //just ignoring id for now
+        this.id = 0;
+        this.title = BookContract.getTitle(cursor);
+        String[] authorStrings = BookContract.getAuthors(cursor);
+        Author[] authorObjects = new Author[authorStrings.length];
+        for (int i = 0; i < authorStrings.length; i++) {
+            authorObjects[i] = new Author(authorStrings[i]);
+        }
+        this.authors = authorObjects;
+        this.isbn = BookContract.getISBN(cursor);
+        this.price = BookContract.getPrice(cursor);
     }
 
     public void writeToProvider(ContentValues out) {
-        // TODO write to ContentValues
+        BookContract.putTitle(out, title);
+        String[] authorStrings = new String[authors.length];
+        for (int i = 0; i < authors.length; i++) {
+            authorStrings[i] = authors[i].toString();
+        }
+        BookContract.putAuthors(out, authorStrings);
+        BookContract.putISBN(out, isbn);
+        BookContract.putPrice(out, price);
     }
 
     @Override
