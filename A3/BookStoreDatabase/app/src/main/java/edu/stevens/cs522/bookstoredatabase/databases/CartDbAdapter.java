@@ -18,6 +18,8 @@ import edu.stevens.cs522.bookstoredatabase.entities.Book;
 
 public class CartDbAdapter {
 
+    //TODO put authors in AUTHOR_TABLE
+
     private static final String DATABASE_NAME = "books.db";
 
     private static final String BOOK_TABLE = "books";
@@ -89,13 +91,15 @@ public class CartDbAdapter {
     }
 
     public Cursor fetchAllBooks() {
-        String[] projection = {_ID, BookContract.TITLE};
+        String[] projection = {_ID, BookContract.TITLE, BookContract.AUTHORS,
+                BookContract.ISBN, BookContract.PRICE};
         db.execSQL(FK_ON);
         return db.query(BOOK_TABLE, projection, null, null, null, null, null);
     }
 
     public Book fetchBook(long rowId) {
-        String[] projection = {_ID, BookContract.TITLE};
+        String[] projection = {_ID, BookContract.TITLE, BookContract.AUTHORS,
+                BookContract.ISBN, BookContract.PRICE};
         String selection = _ID + " = ? ";
         String[] selectionArgs = { Long.toString(rowId) };
         db.execSQL(FK_ON);
@@ -118,6 +122,7 @@ public class CartDbAdapter {
     }
 
     public boolean delete(Book book) {
+        //TODO more uniquely get book
         String selection = BookContract.TITLE + " = ?";
         String[] selectionArgs = { book.title };
         db.execSQL(FK_ON);
@@ -128,7 +133,7 @@ public class CartDbAdapter {
     public boolean deleteAll() {
         db.execSQL(FK_ON);
         db.delete(BOOK_TABLE, null, null);
-        db.delete(AUTHOR_TABLE, null, null);
+        //TODO db.delete(AUTHOR_TABLE, null, null);
         return false;
     }
 

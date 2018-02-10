@@ -7,9 +7,12 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
@@ -32,6 +35,10 @@ public class MainActivity extends Activity {
     // The database adapter
     private CartDbAdapter dba;
 
+    private Cursor cursor;
+
+    private SimpleCursorAdapter adapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +48,67 @@ public class MainActivity extends Activity {
         // Set the layout (use cart.xml layout)
         setContentView(R.layout.cart);
 
-        // TODO open the database using the database adapter
+        // open the database using the database adapter
+        dba = new CartDbAdapter(getApplicationContext());
+        dba.open();
 
-        // TODO query the database using the database adapter, and manage the cursor on the main thread
+        // query the database using the database adapter, and manage the cursor on the main thread
+        cursor = dba.fetchAllBooks();
+        startManagingCursor(cursor);
 
-        // TODO use SimpleCursorAdapter to display the cart contents.
+        // use SimpleCursorAdapter to display the cart contents.
+        String[] from = new String[] { BookContract.TITLE, BookContract.AUTHORS };
+        int[] to = new int[] { R.id.cart_row_title, R.id.cart_row_author };
+        adapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.cart_row, cursor, from, to);
+        ListView listView = findViewById(R.id.cart_list);
+        listView.setAdapter(adapter);
+        registerForContextMenu(listView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Book book = new Book((Cursor)adapter.getItem(position));
+                Intent viewIntent = new Intent(parent.getContext(), ViewBookActivity.class);
+                viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
+                startActivity(viewIntent);
+            }
+        });
+    }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId() == R.id.cart_list) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.listview_menu, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        super.onContextItemSelected(item);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        ListView listView = findViewById(R.id.cart_list);
+        Book book = new Book((Cursor)listView.getItemAtPosition(info.position));
+        switch(item.getItemId()) {
+
+            case R.id.view:
+                Intent viewIntent = new Intent(this, ViewBookActivity.class);
+                viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
+                startActivity(viewIntent);
+                break;
+
+            case R.id.delete:
+                dba.delete(book);
+                cursor.requery();
+                adapter.notifyDataSetChanged();
+                break;
+
+            default:
+        }
+
+        return false;
     }
 
     @Override
@@ -73,7 +135,7 @@ public class MainActivity extends Activity {
             // CHECKOUT provide the UI for checking out
             case R.id.checkout:
                 Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
-                //FIXME checkoutIntent.putExtra(CheckoutActivity.NUM_BOOKS_KEY, int);
+                checkoutIntent.putExtra(CheckoutActivity.NUM_BOOKS_KEY, dba.fetchAllBooks().getCount());
                 startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
@@ -86,16 +148,23 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        // TODO Handle results from the Search and Checkout activities.
+        // Handle results from the Add and Checkout activities.
 
         // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
-        switch (requestCode) {
-            case ADD_REQUEST:
-                // ADD: add the book that is returned to the shopping cart.
-                break;
-            case CHECKOUT_REQUEST:
-                // CHECKOUT: empty the shopping cart.
-                break;
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case ADD_REQUEST:
+                    // ADD: add the book that is returned to the shopping cart.
+                    Book book = (Book) intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
+                    dba.persist(book);
+                    adapter.notifyDataSetChanged();
+                    break;
+                case CHECKOUT_REQUEST:
+                    // CHECKOUT: empty the shopping cart.
+                    dba.deleteAll();
+                    adapter.notifyDataSetChanged();
+                    break;
+            }
         }
 
 
