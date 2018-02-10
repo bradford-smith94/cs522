@@ -35,7 +35,7 @@ public class Author implements Parcelable {
                 break;
             default:
                 firstName = name[0];
-                middleInitial = name[1];
+                middleInitial = String.valueOf(name[1].charAt(0));
                 lastName = name[2];
         }
     }
