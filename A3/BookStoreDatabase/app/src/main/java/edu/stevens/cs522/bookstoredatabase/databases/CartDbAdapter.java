@@ -1,5 +1,6 @@
 package edu.stevens.cs522.bookstoredatabase.databases;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -23,7 +24,13 @@ public class CartDbAdapter {
 
     private static final String AUTHOR_TABLE = "authors";
 
+    private static final String BOOK_FK = "book_fk";
+
+    private static final String AUTHOR_BOOK_INDEX = "authorsBookIndex";
+
     private static final String _ID = "_id";
+
+    private static final String FK_ON = "PRAGMA foreign_keys=ON;";
 
     private static final int DATABASE_VERSION = 1;
 
@@ -35,17 +42,20 @@ public class CartDbAdapter {
     public static class DatabaseHelper extends SQLiteOpenHelper {
         private static final String TAG = DatabaseHelper.class.getCanonicalName();
 
-        private static final String DATABASE_CREATE = "create table " + BOOK_TABLE + " ("
-                + _ID + " integer primary key, "
-                + BookContract.TITLE + " text not null, "
-                + BookContract.AUTHORS + " text not null, "
-                + BookContract.ISBN + " text not null, "
-                + BookContract.PRICE + " text )"
-                + "create table " + AUTHOR_TABLE + " ("
-                + _ID + " integer primary key, "
-                + AuthorContract.FIRST_NAME + " text not null "
-                + AuthorContract.MIDDLE_INITIAL + " text "
-                + AuthorContract.LAST_NAME + " text not null )";
+        private static final String DATABASE_CREATE = "CREATE TABLE " + BOOK_TABLE + " ("
+                + _ID + " INTEGER PRIMARY KEY, "
+                + BookContract.TITLE + " TEXT NOT NULL, "
+                + BookContract.AUTHORS + " TEXT NOT NULL, "
+                + BookContract.ISBN + " TEXT NOT NULL, "
+                + BookContract.PRICE + " TEXT );"
+                + "CREATE TABLE " + AUTHOR_TABLE + " ("
+                + _ID + " INTEGER PRIMARY KEY, "
+                + AuthorContract.FIRST_NAME + " TEXT NOT NULL, "
+                + AuthorContract.MIDDLE_INITIAL + " TEXT, "
+                + AuthorContract.LAST_NAME + " TEXT NOT NULL, "
+                + BOOK_FK + " INTEGER NOT NULL,"
+                + "FOREIGN KEY " + BOOK_FK + " REFERENCES " + BOOK_TABLE + "(" + _ID + ") ON DELETE CASCADE );"
+                + "CREATE INDEX " + AUTHOR_BOOK_INDEX + " ON " + AUTHOR_TABLE + "(" + BOOK_FK + ");";
 
         public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -60,6 +70,7 @@ public class CartDbAdapter {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading db from version " + oldVersion + " to " + newVersion);
 
+            db.execSQL(FK_ON);
             db.execSQL("DROP TABLE IF EXISTS " + BOOK_TABLE);
             db.execSQL("DROP TABLE IF EXISTS " + AUTHOR_TABLE);
 
@@ -74,29 +85,50 @@ public class CartDbAdapter {
 
     public void open() throws SQLException {
         db = dbHelper.getWritableDatabase();
+        db.execSQL(FK_ON);
     }
 
     public Cursor fetchAllBooks() {
-        String[] projection = {_ID, BookContract.TITLE, BookContract.AUTHORS};
+        String[] projection = {_ID, BookContract.TITLE};
+        db.execSQL(FK_ON);
         return db.query(BOOK_TABLE, projection, null, null, null, null, null);
     }
 
     public Book fetchBook(long rowId) {
-        // TODO
-        return null;
+        String[] projection = {_ID, BookContract.TITLE};
+        String selection = _ID + " = ? ";
+        String[] selectionArgs = { Long.toString(rowId) };
+        db.execSQL(FK_ON);
+        Cursor result = db.query(BOOK_TABLE, projection, selection, selectionArgs, null, null, null);
+        return new Book(result);
     }
 
     public void persist(Book book) throws SQLException {
-        // TODO
+        ContentValues values = new ContentValues();
+        BookContract.putTitle(values, book.title);
+        BookContract.putISBN(values, book.isbn);
+        BookContract.putPrice(values, book.price);
+        String[] authorStrings = new String[book.authors.length];
+        for (int i = 0; i < book.authors.length; i++) {
+            authorStrings[i] = book.authors[i].toString();
+        }
+        BookContract.putAuthors(values, authorStrings);
+
+        db.insert(BOOK_TABLE, null, values);
     }
 
     public boolean delete(Book book) {
-        // TODO
+        String selection = BookContract.TITLE + " = ?";
+        String[] selectionArgs = { book.title };
+        db.execSQL(FK_ON);
+        db.delete(BOOK_TABLE, selection, selectionArgs);
         return false;
     }
 
     public boolean deleteAll() {
-        // TODO
+        db.execSQL(FK_ON);
+        db.delete(BOOK_TABLE, null, null);
+        db.delete(AUTHOR_TABLE, null, null);
         return false;
     }
 

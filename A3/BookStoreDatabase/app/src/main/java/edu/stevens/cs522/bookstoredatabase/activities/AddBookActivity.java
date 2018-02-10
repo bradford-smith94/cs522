@@ -17,10 +17,10 @@ import edu.stevens.cs522.bookstoredatabase.entities.Book;
 
 
 public class AddBookActivity extends Activity {
-	
+
 	// Use this as the key to return the book details as a Parcelable extra in the result intent.
 	public static final String BOOK_RESULT_KEY = "book_result";
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,7 +60,7 @@ public class AddBookActivity extends Activity {
 		}
 		return false;
 	}
-	
+
 	public Book addBook(){
 		// Just build a Book object with the search criteria and return that.
 		EditText editText = findViewById(R.id.search_title);
@@ -77,7 +77,7 @@ public class AddBookActivity extends Activity {
 			authors[i] = new Author(authorList.get(i).trim());
 		}
 
-		// FIXME just ignoring id and price for now
+		// just ignoring id and price for now
 		return new Book(0, title, authors, isbn, null);
 	}
 
