@@ -16,20 +16,42 @@ public class MessageContract implements BaseColumns {
 
     public static final String SENDER = "sender";
 
-    // TODO remaining columns in Messages table
+    private static int messageTextColumn = -1;
 
-    private int messageTextColumn = -1;
-
-    public String getMessageText(Cursor cursor) {
+    public static String getMessageText(Cursor cursor) {
         if (messageTextColumn < 0) {
             messageTextColumn = cursor.getColumnIndexOrThrow(MESSAGE_TEXT);
         }
         return cursor.getString(messageTextColumn);
     }
 
-    public void putMessageText(ContentValues out, String messageText) {
+    public static void putMessageText(ContentValues out, String messageText) {
         out.put(MESSAGE_TEXT, messageText);
     }
 
-    // TODO remaining getter and putter operations for other columns
+    private static int timestampColumn = -1;
+
+    public static long getTimestamp(Cursor cursor) {
+        if (timestampColumn < 0) {
+            timestampColumn = cursor.getColumnIndexOrThrow(TIMESTAMP);
+        }
+        return cursor.getLong(timestampColumn);
+    }
+
+    public static void putTimestamp(ContentValues out, long timestamp) {
+        out.put(TIMESTAMP, timestamp);
+    }
+
+    private static int senderColumn = -1;
+
+    public static String getSender(Cursor cursor) {
+        if (senderColumn < 0) {
+            senderColumn = cursor.getColumnIndexOrThrow(SENDER);
+        }
+        return cursor.getString(senderColumn);
+    }
+
+    public static void putSender(ContentValues out, String sender) {
+        out.put(SENDER, sender);
+    }
 }
