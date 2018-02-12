@@ -34,6 +34,17 @@ public class CartDbAdapter {
 
     private static final String FK_ON = "PRAGMA foreign_keys=ON;";
 
+    private static final String BOOKS_JOIN_AUTHORS = BOOK_TABLE + " JOIN "
+            + AUTHOR_TABLE + " ON " + BOOK_TABLE + "." + _ID + " = "
+            + AUTHOR_TABLE + "." + BOOK_FK;
+
+    private static final String GET_AUTHORS = "GROUP_CONCAT("
+            + AuthorContract.FIRST_NAME + " || ' ' || " + AuthorContract.MIDDLE_INITIAL
+            + " || ' ' || " + AuthorContract.LAST_NAME + ", '|') AS " + BookContract.AUTHORS;
+
+    private static final String GROUPBY =  BOOK_TABLE + "." + _ID + ", "
+            + BookContract.TITLE + ", " + BookContract.PRICE + ", " + BookContract.ISBN;
+
     private static final int DATABASE_VERSION = 1;
 
     private DatabaseHelper dbHelper;
@@ -44,20 +55,21 @@ public class CartDbAdapter {
     public static class DatabaseHelper extends SQLiteOpenHelper {
         private static final String TAG = DatabaseHelper.class.getCanonicalName();
 
-        private static final String DATABASE_CREATE = "CREATE TABLE " + BOOK_TABLE + " ("
+        private static final String BOOKS_CREATE = "CREATE TABLE " + BOOK_TABLE + " ("
                 + _ID + " INTEGER PRIMARY KEY, "
                 + BookContract.TITLE + " TEXT NOT NULL, "
-                + BookContract.AUTHORS + " TEXT NOT NULL, "
                 + BookContract.ISBN + " TEXT NOT NULL, "
-                + BookContract.PRICE + " TEXT );"
-                + "CREATE TABLE " + AUTHOR_TABLE + " ("
+                + BookContract.PRICE + " TEXT );";
+
+        private static final String AUTHORS_CREATE = "CREATE TABLE " + AUTHOR_TABLE + " ("
                 + _ID + " INTEGER PRIMARY KEY, "
                 + AuthorContract.FIRST_NAME + " TEXT NOT NULL, "
                 + AuthorContract.MIDDLE_INITIAL + " TEXT, "
                 + AuthorContract.LAST_NAME + " TEXT NOT NULL, "
-                + BOOK_FK + " INTEGER NOT NULL,"
-                + "FOREIGN KEY " + BOOK_FK + " REFERENCES " + BOOK_TABLE + "(" + _ID + ") ON DELETE CASCADE );"
-                + "CREATE INDEX " + AUTHOR_BOOK_INDEX + " ON " + AUTHOR_TABLE + "(" + BOOK_FK + ");";
+                + BOOK_FK + " INTEGER NOT NULL, "
+                + "FOREIGN KEY (" + BOOK_FK + ") REFERENCES " + BOOK_TABLE + "(" + _ID + ") ON DELETE CASCADE );";
+
+        private static final String AUTHOR_INDEX_CREATE = "CREATE INDEX " + AUTHOR_BOOK_INDEX + " ON " + AUTHOR_TABLE + "(" + BOOK_FK + ");";
 
         public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -65,7 +77,9 @@ public class CartDbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(DATABASE_CREATE);
+            db.execSQL(BOOKS_CREATE);
+            db.execSQL(AUTHORS_CREATE);
+            db.execSQL(AUTHOR_INDEX_CREATE);
         }
 
         @Override
@@ -91,19 +105,19 @@ public class CartDbAdapter {
     }
 
     public Cursor fetchAllBooks() {
-        String[] projection = {_ID, BookContract.TITLE, BookContract.AUTHORS,
-                BookContract.ISBN, BookContract.PRICE};
+        String[] projection = {BOOK_TABLE + "." + _ID, BookContract.TITLE, BookContract.PRICE,
+                BookContract.ISBN, GET_AUTHORS};
         db.execSQL(FK_ON);
-        return db.query(BOOK_TABLE, projection, null, null, null, null, null);
+        return db.query(BOOKS_JOIN_AUTHORS, projection, null, null, GROUPBY, null, null);
     }
 
     public Book fetchBook(long rowId) {
-        String[] projection = {_ID, BookContract.TITLE, BookContract.AUTHORS,
-                BookContract.ISBN, BookContract.PRICE};
+        String[] projection = {BOOK_TABLE + "." + _ID, BookContract.TITLE, BookContract.PRICE,
+                BookContract.ISBN, GET_AUTHORS};
         String selection = _ID + " = ? ";
         String[] selectionArgs = { Long.toString(rowId) };
         db.execSQL(FK_ON);
-        Cursor result = db.query(BOOK_TABLE, projection, selection, selectionArgs, null, null, null);
+        Cursor result = db.query(BOOKS_JOIN_AUTHORS, projection, selection, selectionArgs, GROUPBY, null, null);
         return new Book(result);
     }
 
@@ -112,13 +126,23 @@ public class CartDbAdapter {
         BookContract.putTitle(values, book.title);
         BookContract.putISBN(values, book.isbn);
         BookContract.putPrice(values, book.price);
-        String[] authorStrings = new String[book.authors.length];
-        for (int i = 0; i < book.authors.length; i++) {
-            authorStrings[i] = book.authors[i].toString();
-        }
-        BookContract.putAuthors(values, authorStrings);
 
-        db.insert(BOOK_TABLE, null, values);
+        db.execSQL(FK_ON);
+
+        //insert book
+        long bookId = db.insert(BOOK_TABLE, null, values);
+
+        //insert authors
+        for (int i = 0; i < book.authors.length; i++) {
+            ContentValues authorValues = new ContentValues();
+            AuthorContract.putFirstName(authorValues, book.authors[i].firstName);
+            AuthorContract.putMiddleInitial(authorValues, book.authors[i].middleInitial);
+            AuthorContract.putLastName(authorValues, book.authors[i].lastName);
+            authorValues.put(BOOK_FK, bookId);
+
+            db.insert(AUTHOR_TABLE, null, authorValues);
+        }
+
     }
 
     public boolean delete(Book book) {
@@ -133,7 +157,7 @@ public class CartDbAdapter {
     public boolean deleteAll() {
         db.execSQL(FK_ON);
         db.delete(BOOK_TABLE, null, null);
-        //TODO db.delete(AUTHOR_TABLE, null, null);
+        db.delete(AUTHOR_TABLE, null, null);
         return false;
     }
 
