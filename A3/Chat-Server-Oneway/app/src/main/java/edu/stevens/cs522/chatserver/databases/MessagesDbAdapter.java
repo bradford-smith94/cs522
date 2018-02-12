@@ -1,5 +1,6 @@
 package edu.stevens.cs522.chatserver.databases;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -31,6 +32,8 @@ public class MessagesDbAdapter {
 
     private static final String PEER_NAME_INDEX = "PeerNameIndex";
 
+    private static final String FK_ON = "PRAGMA foreign_keys=ON;";
+
     private static final int DATABASE_VERSION = 1;
 
     private DatabaseHelper dbHelper;
@@ -50,6 +53,8 @@ public class MessagesDbAdapter {
                 + _ID + " INTEGER PRIMARY KEY,"
                 + MessageContract.MESSAGE_TEXT + " TEXT NOT NULL,"
                 + MessageContract.TIMESTAMP + " LONG NOT NULL,"
+                + MessageContract.SENDER + " TEXT NOT NULL,"
+                + PEER_FK + " INTEGER NOT NULL,"
                 + "FOREIGN KEY " + PEER_FK + " REFERENCES " + PEER_TABLE + "(" + _ID + ") ON DELETE CASCADE );"
                 + "CREATE INDEX " + MESSAGES_PEER_INDEX + " ON " + MESSAGE_TABLE + "(" + PEER_FK + ");"
                 + "CREATE INDEX " + PEER_NAME_INDEX + " ON " + PEER_TABLE + "(" + PeerContract.NAME + ");";
@@ -60,12 +65,16 @@ public class MessagesDbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            // TODO
+            db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            // TODO
+            db.execSQL(FK_ON);
+            db.execSQL("DROP TABLE IF EXISTS " + PEER_TABLE);
+            db.execSQL("DROP TABLE IF EXISTS " + MESSAGE_TABLE);
+
+            onCreate(db);
         }
     }
 
@@ -75,31 +84,46 @@ public class MessagesDbAdapter {
     }
 
     public void open() throws SQLException {
-        // TODO
+        db = dbHelper.getWritableDatabase();
+        db.execSQL(FK_ON);
     }
 
     public Cursor fetchAllMessages() {
-        // TODO
-        return null;
+        String[] projection = {_ID, MessageContract.MESSAGE_TEXT, MessageContract.TIMESTAMP, MessageContract.SENDER};
+        db.execSQL(FK_ON);
+        return db.query(MESSAGE_TABLE, projection, null, null, null, null, null);
     }
 
     public Cursor fetchAllPeers() {
-        // TODO
-        return null;
+        String[] projection = {_ID, PeerContract.NAME, PeerContract.TIMESTAMP, PeerContract.ADDRESS, PeerContract.PORT};
+        db.execSQL(FK_ON);
+        return db.query(PEER_TABLE, projection, null, null, null, null, null);
     }
 
     public Peer fetchPeer(long peerId) {
-        // TODO
-        return null;
+        String[] projection = {_ID, PeerContract.NAME, PeerContract.TIMESTAMP, PeerContract.ADDRESS, PeerContract.PORT};
+        String selection = _ID + " = ?";
+        String[] selectionArgs = {Long.toString(peerId)};
+        db.execSQL(FK_ON);
+        Cursor result = db.query(PEER_TABLE, projection, selection, selectionArgs, null, null, null);
+        return new Peer(result);
     }
 
     public Cursor fetchMessagesFromPeer(Peer peer) {
-        // TODO
-        return null;
+        String[] projection = {_ID, MessageContract.MESSAGE_TEXT, MessageContract.TIMESTAMP, MessageContract.SENDER};
+        String selection = MessageContract.SENDER + " = ?";
+        String[] selectionArgs = {peer.name};
+        db.execSQL(FK_ON);
+        return db.query(MESSAGE_TABLE, projection, selection, selectionArgs, null, null, null);
     }
 
     public void persist(Message message) throws SQLException {
-        // TODO
+        ContentValues values = new ContentValues();
+        MessageContract.putMessageText(values, message.messageText);
+        MessageContract.putTimestamp(values, message.timestamp.getTime());
+        MessageContract.putSender(values, message.sender);
+
+        db.insert(MESSAGE_TABLE, null, values);
     }
 
     /**
@@ -109,11 +133,16 @@ public class MessagesDbAdapter {
      * @throws SQLException
      */
     public long persist(Peer peer) throws SQLException {
-        // TODO
-        throw new SQLException("Failed to add peer "+peer.name);
+        ContentValues values = new ContentValues();
+        PeerContract.putName(values, peer.name);
+        PeerContract.putTimestamp(values, peer.timestamp.getTime());
+        PeerContract.putAddress(values, peer.address.getAddress());
+        PeerContract.putPort(values, peer.port);
+
+        return db.insert(PEER_TABLE, null, values);
     }
 
     public void close() {
-        // TODO
+        db.close();
     }
 }

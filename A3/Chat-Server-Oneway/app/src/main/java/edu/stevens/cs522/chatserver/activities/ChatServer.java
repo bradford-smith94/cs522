@@ -1,7 +1,7 @@
 /*********************************************************************
 
     Chat server: accept chat messages from clients.
-    
+
     Sender name and GPS coordinates are encoded
     in the messages, and stripped off upon receipt.
 
@@ -43,27 +43,29 @@ import static android.R.attr.port;
 public class ChatServer extends Activity implements OnClickListener {
 
 	final static public String TAG = ChatServer.class.getCanonicalName();
-		
+
 	/*
 	 * Socket used both for sending and receiving
 	 */
-	private DatagramSocket serverSocket; 
+	private DatagramSocket serverSocket;
 
 	/*
 	 * True as long as we don't get socket errors
 	 */
-	private boolean socketOK = true; 
+	private boolean socketOK = true;
 
     /*
      * UI for displayed received messages
      */
 	private SimpleCursorAdapter messages;
-	
+
 	private ListView messageList;
 
     private SimpleCursorAdapter messagesAdapter;
 
     private MessagesDbAdapter messagesDbAdapter;
+
+    private Cursor cursor;
 
     private Button next;
 
@@ -71,9 +73,9 @@ public class ChatServer extends Activity implements OnClickListener {
      * Use to configure the app (user name and port)
      */
     private SharedPreferences settings;
-	
+
 	/*
-	 * Called when the activity is first created. 
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -107,11 +109,22 @@ public class ChatServer extends Activity implements OnClickListener {
 
         setContentView(R.layout.messages);
 
-        // TODO open the database using the database adapter
+        // open the database using the database adapter
+        messagesDbAdapter = new MessagesDbAdapter(getApplicationContext());
+        messagesDbAdapter.open();
 
-        // TODO query the database using the database adapter, and manage the cursor on the messages thread
+        // query the database using the database adapter, and manage the cursor on the messages thread
+        cursor = messagesDbAdapter.fetchAllMessages();
+        startManagingCursor(cursor);
 
-        // TODO use SimpleCursorAdapter to display the messages received.
+        // use SimpleCursorAdapter to display the messages received.
+        String[] from = {MessageContract.MESSAGE_TEXT};
+        int[] to = {android.R.id.text1};
+        messagesAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                android.R.layout.simple_list_item_1, cursor, from, to);
+        ListView listView = (ListView)findViewById(R.id.message_list);
+        listView.setAdapter(messagesAdapter);
+
 
         // TODO bind the button for "next" to this activity as listener
 
@@ -126,7 +139,9 @@ public class ChatServer extends Activity implements OnClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        // TODO inflate a menu with PEERS and SETTINGS options
+        // inflate a menu with PEERS and SETTINGS options
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chatserver_menu, menu);
 
         return true;
     }
@@ -136,14 +151,16 @@ public class ChatServer extends Activity implements OnClickListener {
         super.onOptionsItemSelected(item);
         switch(item.getItemId()) {
 
-            // TODO PEERS provide the UI for viewing list of peers
+            // PEERS provide the UI for viewing list of peers
             case R.id.peers:
+                Intent viewPeersIntent = new Intent(this, ViewPeersActivity.class);
+                startActivity(viewPeersIntent);
                 break;
 
-            // TODO SETTINGS provide the UI for settings
+            // SETTINGS provide the UI for settings
             case R.id.settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 break;
 
             default:
@@ -154,19 +171,19 @@ public class ChatServer extends Activity implements OnClickListener {
 
 
     public void onClick(View v) {
-		
+
 		byte[] receiveData = new byte[1024];
 
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
 		try {
-			
+
 			serverSocket.receive(receivePacket);
 			Log.i(TAG, "Received a packet");
 
 			InetAddress sourceIPAddress = receivePacket.getAddress();
 			Log.i(TAG, "Source IP Address: " + sourceIPAddress);
-			
+
 			String msgContents[] = new String(receivePacket.getData(), 0, receivePacket.getLength()).split(":");
 
             Message message = new Message();
@@ -188,10 +205,10 @@ public class ChatServer extends Activity implements OnClickListener {
             messagesAdapter.notifyDataSetChanged();
 
 		} catch (Exception e) {
-			
+
 			Log.e(TAG, "Problems receiving packet: " + e.getMessage());
 			socketOK = false;
-		} 
+		}
 
 	}
 
@@ -208,5 +225,5 @@ public class ChatServer extends Activity implements OnClickListener {
 	boolean socketIsOK() {
 		return socketOK;
 	}
-	
+
 }
