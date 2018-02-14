@@ -43,21 +43,26 @@ public class MessagesDbAdapter {
 
     public static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final String DATABASE_CREATE = "CREATE TABLE " + PEER_TABLE + " ("
+        private static final String PEERS_CREATE = "CREATE TABLE " + PEER_TABLE + " ("
                 + _ID + " INTEGER PRIMARY KEY,"
                 + PeerContract.NAME + " TEXT NOT NULL,"
                 + PeerContract.TIMESTAMP + " LONG NOT NULL,"
                 + PeerContract.ADDRESS + " TEXT NOT NULL,"
-                + PeerContract.PORT + " INTEGER NOT NULL );"
-                + "CREATE TABLE " + MESSAGE_TABLE + " ("
+                + PeerContract.PORT + " INTEGER NOT NULL );";
+
+        private static final String MESSAGES_CREATE = "CREATE TABLE " + MESSAGE_TABLE + " ("
                 + _ID + " INTEGER PRIMARY KEY,"
                 + MessageContract.MESSAGE_TEXT + " TEXT NOT NULL,"
                 + MessageContract.TIMESTAMP + " LONG NOT NULL,"
                 + MessageContract.SENDER + " TEXT NOT NULL,"
                 + PEER_FK + " INTEGER NOT NULL,"
-                + "FOREIGN KEY " + PEER_FK + " REFERENCES " + PEER_TABLE + "(" + _ID + ") ON DELETE CASCADE );"
-                + "CREATE INDEX " + MESSAGES_PEER_INDEX + " ON " + MESSAGE_TABLE + "(" + PEER_FK + ");"
-                + "CREATE INDEX " + PEER_NAME_INDEX + " ON " + PEER_TABLE + "(" + PeerContract.NAME + ");";
+                + "FOREIGN KEY (" + PEER_FK + ") REFERENCES " + PEER_TABLE + "(" + _ID + ") ON DELETE CASCADE );";
+
+        private static final String MESSAGES_P_INDEX_CREATE = "CREATE INDEX "
+                + MESSAGES_PEER_INDEX + " ON " + MESSAGE_TABLE + "(" + PEER_FK + ");";
+
+        private static final String PEER_NAME_INDEX_CREATE = "CREATE INDEX "
+                + PEER_NAME_INDEX + " ON " + PEER_TABLE + "(" + PeerContract.NAME + ");";
 
         public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -65,7 +70,10 @@ public class MessagesDbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(DATABASE_CREATE);
+            db.execSQL(PEERS_CREATE);
+            db.execSQL(MESSAGES_CREATE);
+            db.execSQL(MESSAGES_P_INDEX_CREATE);
+            db.execSQL(PEER_NAME_INDEX_CREATE);
         }
 
         @Override
