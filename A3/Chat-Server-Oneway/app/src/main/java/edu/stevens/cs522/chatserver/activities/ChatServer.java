@@ -61,8 +61,6 @@ public class ChatServer extends Activity implements OnClickListener {
 
 	private ListView messageList;
 
-    private SimpleCursorAdapter messagesAdapter;
-
     private MessagesDbAdapter messagesDbAdapter;
 
     private Cursor cursor;
@@ -120,13 +118,15 @@ public class ChatServer extends Activity implements OnClickListener {
         // use SimpleCursorAdapter to display the messages received.
         String[] from = {MessageContract.MESSAGE_TEXT};
         int[] to = {android.R.id.text1};
-        messagesAdapter = new SimpleCursorAdapter(getApplicationContext(),
+        messages = new SimpleCursorAdapter(getApplicationContext(),
                 android.R.layout.simple_list_item_1, cursor, from, to);
-        ListView listView = (ListView)findViewById(R.id.message_list);
-        listView.setAdapter(messagesAdapter);
+        messageList = (ListView)findViewById(R.id.message_list);
+        messageList.setAdapter(messages);
 
 
-        // TODO bind the button for "next" to this activity as listener
+        // bind the button for "next" to this activity as listener
+        // button onclick bound in layout
+        next = (Button)findViewById(R.id.next);
 
 	}
 
@@ -202,7 +202,7 @@ public class ChatServer extends Activity implements OnClickListener {
             message.senderId = messagesDbAdapter.persist(sender);
             messagesDbAdapter.persist(message);
 
-            messagesAdapter.notifyDataSetChanged();
+            messages.notifyDataSetChanged();
 
 		} catch (Exception e) {
 
