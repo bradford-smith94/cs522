@@ -39,8 +39,9 @@ public class CartDbAdapter {
             + AUTHOR_TABLE + "." + BOOK_FK;
 
     private static final String GET_AUTHORS = "GROUP_CONCAT("
-            + AuthorContract.FIRST_NAME + " || ' ' || " + AuthorContract.MIDDLE_INITIAL
-            + " || ' ' || " + AuthorContract.LAST_NAME + ", '|') AS " + BookContract.AUTHORS;
+            + AuthorContract.FIRST_NAME + " || ' ' || COALESCE(" +
+            AuthorContract.MIDDLE_INITIAL + " || ' ', '') || " +
+            AuthorContract.LAST_NAME + ", '|') AS " + BookContract.AUTHORS;
 
     private static final String GROUPBY =  BOOK_TABLE + "." + _ID + ", "
             + BookContract.TITLE + ", " + BookContract.PRICE + ", " + BookContract.ISBN;
