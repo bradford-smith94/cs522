@@ -149,7 +149,20 @@ public class MessagesDbAdapter {
         PeerContract.putAddress(values, peer.address.getAddress());
         PeerContract.putPort(values, peer.port);
 
-        return db.insert(PEER_TABLE, null, values);
+        String[] projection = {_ID, PeerContract.NAME};
+        String selection = PeerContract.NAME + " = ?";
+        String[] selectionArgs = {peer.name};
+        db.execSQL(FK_ON);
+        Cursor cursor = db.query(PEER_TABLE, projection, selection, selectionArgs, null, null, null);
+        if (cursor.getCount() == 0) {
+            return db.insert(PEER_TABLE, null, values);
+        } else {
+            cursor.moveToFirst();
+            selection = _ID + " = ?";
+            selectionArgs = new String[]{String.valueOf(PeerContract.getId(cursor))};
+            db.update(PEER_TABLE, values, selection, selectionArgs);
+            return PeerContract.getId(cursor);
+        }
     }
 
     public void close() {

@@ -39,9 +39,9 @@ public class ViewPeersActivity extends Activity implements AdapterView.OnItemCli
         startManagingCursor(cursor);
 
         String[] from = {PeerContract.NAME};
-        int[] to = {android.R.id.text1};
+        int[] to = {R.id.text};
         adapter = new SimpleCursorAdapter(getApplicationContext(),
-                android.R.layout.simple_list_item_1, cursor, from, to);
+                R.layout.message, cursor, from, to);
         peers = (ListView)findViewById(R.id.peerList);
         peers.setOnItemClickListener(this);
         peers.setAdapter(adapter);

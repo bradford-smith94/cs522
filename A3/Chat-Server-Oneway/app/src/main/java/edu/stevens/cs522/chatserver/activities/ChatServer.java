@@ -117,9 +117,9 @@ public class ChatServer extends Activity implements OnClickListener {
 
         // use SimpleCursorAdapter to display the messages received.
         String[] from = {MessageContract.MESSAGE_TEXT};
-        int[] to = {android.R.id.text1};
+        int[] to = {R.id.text};
         messages = new SimpleCursorAdapter(getApplicationContext(),
-                android.R.layout.simple_list_item_1, cursor, from, to);
+                R.layout.message, cursor, from, to);
         messageList = (ListView)findViewById(R.id.message_list);
         messageList.setAdapter(messages);
 
