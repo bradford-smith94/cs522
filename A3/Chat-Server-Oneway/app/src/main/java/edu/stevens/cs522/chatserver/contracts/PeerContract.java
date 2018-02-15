@@ -20,6 +20,8 @@ public class PeerContract implements BaseColumns {
 
     public static final String PORT = "port";
 
+    private static final String _ID = "_id";
+
     private static int nameColumn = -1;
 
     public static String getName(Cursor cursor) {
@@ -70,6 +72,15 @@ public class PeerContract implements BaseColumns {
 
     public static void putPort(ContentValues out, int port) {
         out.put(PORT, port);
+    }
+
+    private static int idColumn = -1;
+
+    public static long getId(Cursor cursor) {
+        if (idColumn < 0) {
+            idColumn = cursor.getColumnIndexOrThrow(_ID);
+        }
+        return Long.parseLong(cursor.getString(idColumn));
     }
 
 }

@@ -27,6 +27,7 @@ public class ViewPeerActivity extends Activity {
         long id = getIntent().getLongExtra(PEER_ID_KEY, 0);
 
         dbAdapter = new MessagesDbAdapter(getApplicationContext());
+        dbAdapter.open();
         Peer peer = dbAdapter.fetchPeer(id);
 
         TextView textView = (TextView)findViewById(R.id.view_user_name);
@@ -37,6 +38,8 @@ public class ViewPeerActivity extends Activity {
         textView.setText(peer.address.toString());
         textView = (TextView) findViewById(R.id.view_port);
         textView.setText(String.valueOf(peer.port));
+
+        dbAdapter.close();
     }
 
 }

@@ -71,9 +71,9 @@ public class MessagesDbAdapter {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(PEERS_CREATE);
+            db.execSQL(PEER_NAME_INDEX_CREATE);
             db.execSQL(MESSAGES_CREATE);
             db.execSQL(MESSAGES_P_INDEX_CREATE);
-            db.execSQL(PEER_NAME_INDEX_CREATE);
         }
 
         @Override
@@ -114,6 +114,7 @@ public class MessagesDbAdapter {
         String[] selectionArgs = {Long.toString(peerId)};
         db.execSQL(FK_ON);
         Cursor result = db.query(PEER_TABLE, projection, selection, selectionArgs, null, null, null);
+        result.moveToFirst();
         return new Peer(result);
     }
 
@@ -130,6 +131,7 @@ public class MessagesDbAdapter {
         MessageContract.putMessageText(values, message.messageText);
         MessageContract.putTimestamp(values, message.timestamp.getTime());
         MessageContract.putSender(values, message.sender);
+        values.put(PEER_FK, message.senderId);
 
         db.insert(MESSAGE_TABLE, null, values);
     }

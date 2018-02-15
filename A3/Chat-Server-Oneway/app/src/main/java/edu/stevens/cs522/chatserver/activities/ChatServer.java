@@ -203,6 +203,7 @@ public class ChatServer extends Activity implements OnClickListener {
             messagesDbAdapter.persist(message);
 
             messages.notifyDataSetChanged();
+            cursor.requery();
 
 		} catch (Exception e) {
 

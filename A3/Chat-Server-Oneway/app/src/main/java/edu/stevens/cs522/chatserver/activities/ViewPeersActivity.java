@@ -14,6 +14,7 @@ import java.util.List;
 import edu.stevens.cs522.chatserver.R;
 import edu.stevens.cs522.chatserver.contracts.PeerContract;
 import edu.stevens.cs522.chatserver.databases.MessagesDbAdapter;
+import edu.stevens.cs522.chatserver.entities.Peer;
 
 
 public class ViewPeersActivity extends Activity implements AdapterView.OnItemClickListener {
@@ -42,6 +43,7 @@ public class ViewPeersActivity extends Activity implements AdapterView.OnItemCli
         adapter = new SimpleCursorAdapter(getApplicationContext(),
                 android.R.layout.simple_list_item_1, cursor, from, to);
         peers = (ListView)findViewById(R.id.peerList);
+        peers.setOnItemClickListener(this);
         peers.setAdapter(adapter);
     }
 
@@ -51,8 +53,9 @@ public class ViewPeersActivity extends Activity implements AdapterView.OnItemCli
         /*
          * Clicking on a peer brings up details
          */
+        Peer clickedPeer = new Peer((Cursor)adapter.getItem(position));
         Intent intent = new Intent(this, ViewPeerActivity.class);
-        intent.putExtra(ViewPeerActivity.PEER_ID_KEY, id);
+        intent.putExtra(ViewPeerActivity.PEER_ID_KEY, clickedPeer.id);
         startActivity(intent);
     }
 }

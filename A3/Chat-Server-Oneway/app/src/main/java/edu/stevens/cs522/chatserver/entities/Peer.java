@@ -66,7 +66,7 @@ public class Peer implements Parcelable {
     }
 
     public Peer(Cursor cursor) {
-        //id =?
+        id = PeerContract.getId(cursor);
         name = PeerContract.getName(cursor);
         timestamp = new Date(PeerContract.getTimestamp(cursor));
         try {
