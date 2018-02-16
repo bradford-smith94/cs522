@@ -2,9 +2,11 @@ package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -20,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.stevens.cs522.bookstore.R;
+import edu.stevens.cs522.bookstore.contracts.BookContract;
 import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.util.BookAdapter;
 
@@ -53,11 +56,14 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         ListView lv = (ListView) findViewById(android.R.id.list);
         lv.setAdapter(bookAdapter);
 
-        // TODO set listeners for item selection and multi-choice CAB
+        // set listeners for item selection and multi-choice CAB
         lv.setOnItemClickListener(this);
+        lv.setMultiChoiceModeListener(this);
 
 
-        // TODO use loader manager to initiate a query of the database
+        // use loader manager to initiate a query of the database
+        LoaderManager lm = getLoaderManager();
+        lm.initLoader(LOADER_ID, null, this);
 
     }
 
@@ -97,18 +103,23 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
-		// TODO Handle results from the Search and Checkout activities.
+		// Handle results from the Add and Checkout activities.
 
         // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
-        switch(requestCode) {
-            case ADD_REQUEST:
-                // ADD: add the book that is returned to the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
-                break;
-            case CHECKOUT_REQUEST:
-                // CHECKOUT: empty the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
-                break;
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case ADD_REQUEST:
+                    // ADD: add the book that is returned to the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    Book book = intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
+                    // TODO: add book
+                    break;
+                case CHECKOUT_REQUEST:
+                    // CHECKOUT: empty the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    // TODO: delete all books
+                    break;
+            }
         }
 
 	}
@@ -125,18 +136,28 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
 	@Override
 	public Loader onCreateLoader(int id, Bundle args) {
-		// TODO use a CursorLoader to initiate a query on the database
-		return null;
+		// use a CursorLoader to initiate a query on the database
+        Uri baseURI = BookContract.CONTENT_URI;
+        String[] projection = {
+                BookContract.ID,
+                BookContract.TITLE,
+                BookContract.AUTHORS,
+                BookContract.ISBN,
+                BookContract.PRICE };
+
+		return new CursorLoader(this, baseURI, projection, null, null, null);
 	}
 
 	@Override
 	public void onLoadFinished(Loader loader, Object data) {
-        // TODO populate the UI with the result of querying the provider
+        // populate the UI with the result of querying the provider
+        bookAdapter.swapCursor((Cursor)data);
 	}
 
 	@Override
 	public void onLoaderReset(Loader loader) {
-        // TODO reset the UI when the cursor is empty
+        // reset the UI when the cursor is empty
+        bookAdapter.swapCursor(null);
 	}
 
 
@@ -163,7 +184,9 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        // TODO inflate the menu for the CAB
+        // inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.books_cab, menu);
 
         selected = new HashSet<Long>();
         return true;

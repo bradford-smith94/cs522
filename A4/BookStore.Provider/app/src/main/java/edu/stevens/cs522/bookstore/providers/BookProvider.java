@@ -1,6 +1,7 @@
 package edu.stevens.cs522.bookstore.providers;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -108,7 +109,14 @@ public class BookProvider extends ContentProvider {
     public String getType(Uri uri) {
         // TODO: Implement this to handle requests for the MIME type of the data
         // at the given URI.
-        throw new UnsupportedOperationException("Not yet implemented");
+        switch (uriMatcher.match(uri)) {
+            case ALL_ROWS:
+                //return contentType("book");
+            case SINGLE_ROW:
+                //return contentItemType("book");
+            default:
+                throw new IllegalArgumentException("Unsupported URI: " + uri);
+        }
     }
 
     @Override
@@ -116,9 +124,15 @@ public class BookProvider extends ContentProvider {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
-                // TODO: Implement this to handle requests to insert a new row.
+                // handle requests to insert a new row.
+                long row = db.insert(BOOKS_TABLE, null, values);
+                Uri instanceUri = BookContract.CONTENT_URI(row);
+
                 // Make sure to notify any observers
-                throw new UnsupportedOperationException("Not yet implemented");
+                ContentResolver cr = getContext().getContentResolver();
+                cr.notifyChange(instanceUri, null);
+
+                return instanceUri;
             case SINGLE_ROW:
                 throw new IllegalArgumentException("insert expects a whole-table URI");
             default:
@@ -132,13 +146,15 @@ public class BookProvider extends ContentProvider {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
-                // TODO: Implement this to handle query of all books.
+                // handle query of all books.
                 return db.query(BOOKS_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
             case SINGLE_ROW:
-                // TODO: Implement this to handle query of a specific book.
-                throw new UnsupportedOperationException("Not yet implemented");
+                // handle query of a specific book.
+                selection = BookContract._ID + " = ?";
+                selectionArgs = new String[]{String.valueOf(BookContract.getId(uri))};
+                return db.query(BOOKS_TABLE, projection, selection, selectionArgs, null, null, null);
             default:
-                throw new IllegalStateException("insert: bad case");
+                throw new IllegalStateException("query: bad case");
         }
     }
 
@@ -150,8 +166,9 @@ public class BookProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // TODO Implement this to handle requests to delete one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+        // handle requests to delete one or more rows.
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        return db.delete(BOOKS_TABLE, selection, selectionArgs);
     }
 
 }

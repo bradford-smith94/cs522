@@ -44,8 +44,4 @@ public class AuthorContract implements BaseColumns {
         return cursor.getLong(idColumn);
     }
 
-    public static void putId(ContentValues values, long id) {
-        values.put(ID, id);
-    }
-
 }
