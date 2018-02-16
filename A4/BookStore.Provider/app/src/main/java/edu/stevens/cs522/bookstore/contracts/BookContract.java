@@ -102,8 +102,51 @@ public class BookContract implements BaseColumns {
         return readStringArray(cursor.getString(authorColumn));
     }
 
+    /*
+     * ISBN column
+     */
 
-    // TODO complete definitions of other getter and setter operations
+    private static int isbnColumn = -1;
 
+    public static String getISBN(Cursor cursor) {
+        if (isbnColumn < 0) {
+            isbnColumn = cursor.getColumnIndexOrThrow(ISBN);
+        }
+        return cursor.getString(isbnColumn);
+    }
+
+    public static void putISBN(ContentValues values, String isbn) {
+        values.put(ISBN, isbn);
+    }
+
+    /*
+     * PRICE column
+     */
+
+    private static int priceColumn = -1;
+
+    public static String getPrice(Cursor cursor) {
+        if (priceColumn < 0) {
+            priceColumn = cursor.getColumnIndexOrThrow(PRICE);
+        }
+        return cursor.getString(priceColumn);
+    }
+
+    public static void putPrice(ContentValues values, String price) {
+        values.put(PRICE, price);
+    }
+
+    /*
+     * ID column
+     */
+
+    private static int idColumn = -1;
+
+    public static long getId(Cursor cursor) {
+        if (idColumn < 0) {
+            idColumn = cursor.getColumnIndexOrThrow(ID);
+        }
+        return cursor.getLong(idColumn);
+    }
 
 }
