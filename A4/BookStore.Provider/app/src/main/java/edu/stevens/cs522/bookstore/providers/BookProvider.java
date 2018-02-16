@@ -9,11 +9,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
+import edu.stevens.cs522.bookstore.contracts.AuthorContract;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
 
-import static edu.stevens.cs522.bookstore.contracts.BookContract.CONTENT_PATH;
-import static edu.stevens.cs522.bookstore.contracts.BookContract.CONTENT_PATH_ITEM;
+import static android.provider.BaseColumns._ID;
 
 public class BookProvider extends ContentProvider {
     public BookProvider() {
@@ -34,11 +35,31 @@ public class BookProvider extends ContentProvider {
 
     private static final String AUTHORS_TABLE = "authors";
 
+    private static final String BOOK_FK = "book_fk";
+
+    private static final String FK_ON = "PRAGMA foreign_keys=ON;";
+
     // Create the constants used to differentiate between the different URI  requests.
     private static final int ALL_ROWS = 1;
     private static final int SINGLE_ROW = 2;
 
     public static class DbHelper extends SQLiteOpenHelper {
+
+        private static final String TAG = DbHelper.class.getCanonicalName();
+
+        private static final String BOOKS_CREATE = "CREATE TABLE " + BOOKS_TABLE + " ("
+                + _ID + " INTEGER PRIMARY KEY, "
+                + BookContract.TITLE + " TEXT NOT NULL, "
+                + BookContract.ISBN + " TEXT NOT NULL, "
+                + BookContract.PRICE + " TEXT );";
+
+        private static final String AUTHORS_CREATE = "CREATE TABLE " + AUTHORS_TABLE + " ("
+                + _ID + " INTEGER PRIMARY KEY, "
+                + AuthorContract.NAME + " TEXT NOT NULL, "
+                + BOOK_FK + " INTEGER NOT NULL, "
+                + "FOREIGN KEY (" + BOOK_FK + ") REFERENCES " + BOOKS_TABLE + "(" + _ID + ") ON DELETE CASCADE );";
+
+        private static final String AUTHOR_INDEX_CREATE = "CREATE INDEX AuthorBookIndex ON " + AUTHORS_TABLE + "(" + BOOK_FK + ");";
 
         public DbHelper(Context context, String name, CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -46,12 +67,21 @@ public class BookProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            // TODO initialize database tables
+            // initialize database tables
+            db.execSQL(BOOKS_CREATE);
+            db.execSQL(AUTHORS_CREATE);
+            db.execSQL(AUTHOR_INDEX_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            // TODO upgrade database if necessary
+            Log.w(TAG, "Upgrading db from version " + oldVersion + " to " + newVersion);
+
+            db.execSQL(FK_ON);
+            db.execSQL("DROP TABLE IF EXISTS " + BOOKS_TABLE);
+            db.execSQL("DROP TABLE IF EXISTS " + AUTHORS_TABLE);
+
+            onCreate(db);
         }
     }
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.stevens.cs522.bookstore.R;
+import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.util.BookAdapter;
 
 public class MainActivity extends Activity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, LoaderManager.LoaderCallbacks {
@@ -52,6 +54,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         lv.setAdapter(bookAdapter);
 
         // TODO set listeners for item selection and multi-choice CAB
+        lv.setOnItemClickListener(this);
 
 
         // TODO use loader manager to initiate a query of the database
@@ -143,8 +146,12 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO query for this book's details, and send to ViewBookActivity
+        // query for this book's details, and send to ViewBookActivity
         // ok to do on main thread for BookStoreWithContentProvider
+        Book book = new Book((Cursor)bookAdapter.getItem(position));
+        Intent viewIntent = new Intent(this, ViewBookActivity.class);
+        viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
+        startActivity(viewIntent);
     }
 
 
