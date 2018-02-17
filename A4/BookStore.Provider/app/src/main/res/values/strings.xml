@@ -22,5 +22,6 @@
 
     <string name="empty_cart">THE CART IS EMPTY!</string>
 
-
+    <string name="checkoutMessage" formatted="false">Sent order for %d book(s)</string>
+    <string name="checkoutMessageEmpty">Empty cart, not sending order</string>
 </resources>

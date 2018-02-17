@@ -1,15 +1,19 @@
 package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import edu.stevens.cs522.bookstore.R;
 
 
 public class CheckoutActivity extends Activity {
+
+    public static String NUM_BOOKS_KEY = "num_books";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +37,15 @@ public class CheckoutActivity extends Activity {
 
             // ORDER: display a toast message of how many books have been ordered and return
             case R.id.order:
-                //TODO: get number of books from intent to print message
+                Context context = getApplicationContext();
+                int numBooks = (int) getIntent().getSerializableExtra(NUM_BOOKS_KEY);
+                String text;
+                if (numBooks > 0)
+                    text = String.format(getString(R.string.checkoutMessage), numBooks);
+                else
+                    text = getString(R.string.checkoutMessageEmpty);
+                Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+                toast.show();
                 setResult(RESULT_OK);
                 finish();
                 break;

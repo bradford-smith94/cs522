@@ -32,7 +32,7 @@ public class ViewBookActivity extends Activity {
 
         ListView listView = (ListView) findViewById(R.id.view_authors);
         authorsAdapter = new ArrayAdapter<String>(getApplicationContext(),
-                android.R.layout.simple_list_item_1);
+                R.layout.author_row, R.id.author_name);
         listView.setAdapter(authorsAdapter);
 
         for (int i = 0; i < book.authors.length; i++) {

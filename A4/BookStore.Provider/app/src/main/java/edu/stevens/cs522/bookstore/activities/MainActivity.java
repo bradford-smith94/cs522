@@ -88,8 +88,9 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
             // CHECKOUT provide the UI for checking out
             case R.id.checkout:
+                Cursor cursor = getContentResolver().query(BookContract.CONTENT_URI, null, null, null, null);
                 Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
-                //TODO: checkout needs number of books in cart
+                checkoutIntent.putExtra(CheckoutActivity.NUM_BOOKS_KEY, cursor.getCount());
                 startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
