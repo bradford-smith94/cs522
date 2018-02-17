@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -126,13 +127,16 @@ public class BookProvider extends ContentProvider {
             case ALL_ROWS:
                 // handle requests to insert a new row.
                 long row = db.insert(BOOKS_TABLE, null, values);
-                Uri instanceUri = BookContract.CONTENT_URI(row);
+                if (row > 0) {
+                    Uri instanceUri = BookContract.CONTENT_URI(row);
 
-                // Make sure to notify any observers
-                ContentResolver cr = getContext().getContentResolver();
-                cr.notifyChange(instanceUri, null);
+                    // Make sure to notify any observers
+                    ContentResolver cr = getContext().getContentResolver();
+                    cr.notifyChange(instanceUri, null);
 
-                return instanceUri;
+                    return instanceUri;
+                }
+                throw new SQLException("insert: Insertion failed");
             case SINGLE_ROW:
                 throw new IllegalArgumentException("insert expects a whole-table URI");
             default:

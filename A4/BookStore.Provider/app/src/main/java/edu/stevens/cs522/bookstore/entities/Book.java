@@ -54,12 +54,14 @@ public class Book implements Parcelable {
 		// init from cursor
         id = BookContract.getId(cursor);
         title = BookContract.getTitle(cursor);
+        /* TODO:
         String[] authorStrings = BookContract.getAuthors(cursor);
         Author[] authorObjects = new Author[authorStrings.length];
         for (int i = 0; i < authorStrings.length; i++) {
             authorObjects[i] = new Author(authorStrings[i]);
         }
         this.authors = authorObjects;
+        */
         isbn = BookContract.getISBN(cursor);
         price = BookContract.getPrice(cursor);
 	}

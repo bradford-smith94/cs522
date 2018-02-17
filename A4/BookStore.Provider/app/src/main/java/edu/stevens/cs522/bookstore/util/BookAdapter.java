@@ -37,10 +37,12 @@ public class BookAdapter extends ResourceCursorAdapter {
         Book book = new Book(cursor);
         titleLine.setText(book.title);
 
+        /* TODO:
         if (book.authors.length > 1) {
             authorLine.setText(book.getFirstAuthor().toString() + " et al");
         } else {
             authorLine.setText(book.getFirstAuthor().toString());
         }
+        */
     }
 }

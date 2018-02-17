@@ -2,6 +2,7 @@ package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -45,8 +46,6 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// TODO check if there is saved UI state, and if so, restore it (i.e. the cart contents)
 
 		// Set the layout (use cart.xml layout)
         setContentView(R.layout.cart);
@@ -112,12 +111,16 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
                     // ADD: add the book that is returned to the shopping cart.
                     // It is okay to do this on the main thread for BookStoreWithContentProvider
                     Book book = intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
-                    // TODO: add book
+                    ContentValues values = new ContentValues();
+                    book.writeToProvider(values);
+                    getContentResolver().insert(BookContract.CONTENT_URI, values);
+                    getContentResolver().notifyChange(BookContract.CONTENT_URI, null);
                     break;
                 case CHECKOUT_REQUEST:
                     // CHECKOUT: empty the shopping cart.
                     // It is okay to do this on the main thread for BookStoreWithContentProvider
-                    // TODO: delete all books
+                    getContentResolver().delete(BookContract.CONTENT_URI, null, null);
+                    getContentResolver().notifyChange(BookContract.CONTENT_URI, null);
                     break;
             }
         }
@@ -126,8 +129,6 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// TODO save the shopping cart contents (which should be a list of parcelables).
-
 	}
 
     /*
@@ -141,7 +142,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         String[] projection = {
                 BookContract.ID,
                 BookContract.TITLE,
-                BookContract.AUTHORS,
+                //TODO: BookContract.AUTHORS,
                 BookContract.ISBN,
                 BookContract.PRICE };
 
@@ -151,6 +152,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	@Override
 	public void onLoadFinished(Loader loader, Object data) {
         // populate the UI with the result of querying the provider
+        ((Cursor)data).setNotificationUri(getContentResolver(), BookContract.CONTENT_URI);
         bookAdapter.swapCursor((Cursor)data);
 	}
 
