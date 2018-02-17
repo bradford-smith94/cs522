@@ -41,6 +41,19 @@ public class BookProvider extends ContentProvider {
 
     private static final String FK_ON = "PRAGMA foreign_keys=ON;";
 
+    private static final String BOOKS_JOIN_AUTHORS = BOOKS_TABLE + " JOIN "
+            + AUTHORS_TABLE + " ON " + BOOKS_TABLE + "." + _ID + " = "
+            + AUTHORS_TABLE + "." + BOOK_FK;
+
+    private static final String GET_AUTHORS = "GROUP_CONCAT("
+            + AuthorContract.NAME + ", '|') AS " + BookContract.AUTHORS;
+
+    private static final String GROUPBY = BOOKS_TABLE + "." + _ID + ", "
+            + BookContract.TITLE + ", " + BookContract.PRICE + ", " + BookContract.ISBN;
+
+    private static final String[] BOOK_PROJECTION = {BOOKS_TABLE + "." + _ID,
+            BookContract.TITLE, BookContract.PRICE, BookContract.ISBN, GET_AUTHORS};
+
     // Create the constants used to differentiate between the different URI  requests.
     private static final int ALL_ROWS = 1;
     private static final int SINGLE_ROW = 2;
@@ -108,13 +121,13 @@ public class BookProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        // TODO: Implement this to handle requests for the MIME type of the data
+        // handle requests for the MIME type of the data
         // at the given URI.
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
-                //return contentType("book");
+                return BookContract.CONTENT_PATH;
             case SINGLE_ROW:
-                //return contentItemType("book");
+                return BookContract.CONTENT_PATH_ITEM;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -123,11 +136,24 @@ public class BookProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.execSQL(FK_ON);
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // handle requests to insert a new row.
+                // pull authors out before inserting book
+                String[] authors = BookContract.readStringArray(values.getAsString(BookContract.AUTHORS));
+                values.remove(BookContract.AUTHORS);
                 long row = db.insert(BOOKS_TABLE, null, values);
                 if (row > 0) {
+                    // insert success, now insert authors
+                    for (int i = 0; i < authors.length; i++) {
+                        ContentValues authorValues = new ContentValues();
+                        AuthorContract.putName(authorValues, authors[i]);
+                        authorValues.put(BOOK_FK, row);
+                        db.insert(AUTHORS_TABLE, null, authorValues);
+                    }
+
+                    // make URI
                     Uri instanceUri = BookContract.CONTENT_URI(row);
 
                     // Make sure to notify any observers
@@ -148,15 +174,16 @@ public class BookProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.execSQL(FK_ON);
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // handle query of all books.
-                return db.query(BOOKS_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+                return db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, sortOrder);
             case SINGLE_ROW:
                 // handle query of a specific book.
                 selection = BookContract._ID + " = ?";
                 selectionArgs = new String[]{String.valueOf(BookContract.getId(uri))};
-                return db.query(BOOKS_TABLE, projection, selection, selectionArgs, null, null, null);
+                return db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, null);
             default:
                 throw new IllegalStateException("query: bad case");
         }
@@ -172,6 +199,7 @@ public class BookProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // handle requests to delete one or more rows.
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.execSQL(FK_ON);
         return db.delete(BOOKS_TABLE, selection, selectionArgs);
     }
 

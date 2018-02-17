@@ -15,6 +15,11 @@
     <string name="author">Author:</string>
     <string name="isbn">ISBN:</string>
 
+    <string name="checkoutName">Name:</string>
+    <string name="checkoutEmail">Email:</string>
+    <string name="checkoutAccount">Credit Account:</string>
+    <string name="checkoutAddress">Address:</string>
+
     <string name="empty_cart">THE CART IS EMPTY!</string>
 
 

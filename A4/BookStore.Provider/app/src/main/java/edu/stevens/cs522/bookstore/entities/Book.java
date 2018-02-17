@@ -36,7 +36,7 @@ public class Book implements Parcelable {
 
     public String getFirstAuthor() {
 		if (authors != null && authors.length > 0) {
-			return authors[0].toString();
+			return authors[0].name;
 		} else {
 			return "";
 		}
@@ -54,14 +54,12 @@ public class Book implements Parcelable {
 		// init from cursor
         id = BookContract.getId(cursor);
         title = BookContract.getTitle(cursor);
-        /* TODO:
         String[] authorStrings = BookContract.getAuthors(cursor);
         Author[] authorObjects = new Author[authorStrings.length];
         for (int i = 0; i < authorStrings.length; i++) {
             authorObjects[i] = new Author(authorStrings[i]);
         }
         this.authors = authorObjects;
-        */
         isbn = BookContract.getISBN(cursor);
         price = BookContract.getPrice(cursor);
 	}
@@ -69,13 +67,11 @@ public class Book implements Parcelable {
 	public void writeToProvider(ContentValues out) {
 		// write to ContentValues
         BookContract.putTitle(out, title);
-        /* TODO: what am I doing with authors?
         String[] authorStrings = new String[authors.length];
         for (int i = 0; i < authors.length; i++) {
-            authorStrings[i] = authors[i].toString();
+            authorStrings[i] = authors[i].name;
         }
         BookContract.putAuthors(out, authorStrings);
-        */
         BookContract.putISBN(out, isbn);
         BookContract.putPrice(out, price);
 	}

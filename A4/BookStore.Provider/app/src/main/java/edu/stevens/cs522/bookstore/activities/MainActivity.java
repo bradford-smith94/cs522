@@ -139,14 +139,8 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	public Loader onCreateLoader(int id, Bundle args) {
 		// use a CursorLoader to initiate a query on the database
         Uri baseURI = BookContract.CONTENT_URI;
-        String[] projection = {
-                BookContract.ID,
-                BookContract.TITLE,
-                //TODO: BookContract.AUTHORS,
-                BookContract.ISBN,
-                BookContract.PRICE };
 
-		return new CursorLoader(this, baseURI, projection, null, null, null);
+		return new CursorLoader(this, baseURI, null, null, null, null);
 	}
 
 	@Override

@@ -26,7 +26,7 @@ public class BookAdapter extends ResourceCursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        return inflater.inflate(ROW_LAYOUT, parent,false);
+        return inflater.inflate(ROW_LAYOUT, parent, false);
     }
 
     @Override
@@ -37,12 +37,10 @@ public class BookAdapter extends ResourceCursorAdapter {
         Book book = new Book(cursor);
         titleLine.setText(book.title);
 
-        /* TODO:
         if (book.authors.length > 1) {
             authorLine.setText(book.getFirstAuthor().toString() + " et al");
         } else {
             authorLine.setText(book.getFirstAuthor().toString());
         }
-        */
     }
 }

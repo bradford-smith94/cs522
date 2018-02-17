@@ -3,6 +3,7 @@ package edu.stevens.cs522.bookstore.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import edu.stevens.cs522.bookstore.R;
@@ -29,17 +30,15 @@ public class ViewBookActivity extends Activity {
         textView = (TextView) findViewById(R.id.view_isbn);
         textView.setText(book.isbn);
 
-        /* TODO:
         ListView listView = (ListView) findViewById(R.id.view_authors);
         authorsAdapter = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_list_item_1);
         listView.setAdapter(authorsAdapter);
 
         for (int i = 0; i < book.authors.length; i++) {
-            authorsAdapter.add(book.authors[i].toString());
+            authorsAdapter.add(book.authors[i].name);
         }
         authorsAdapter.notifyDataSetChanged();
-        */
     }
 
 }

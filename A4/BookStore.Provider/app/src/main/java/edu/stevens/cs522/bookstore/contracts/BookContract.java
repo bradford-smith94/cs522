@@ -102,6 +102,21 @@ public class BookContract implements BaseColumns {
         return readStringArray(cursor.getString(authorColumn));
     }
 
+    public static void putAuthors(ContentValues values, String[] authors) {
+        if (authors.length > 1) {
+            StringBuffer authorString = new StringBuffer();
+            int i;
+            for (i = 0; i < authors.length - 1; i++) {
+                authorString.append(authors[i].toString());
+                authorString.append(SEPARATOR_CHAR);
+            }
+            authorString.append(authors[i].toString());
+            values.put(AUTHORS, authorString.toString());
+        } else {
+            values.put(AUTHORS, authors[0].toString());
+        }
+    }
+
     /*
      * ISBN column
      */
