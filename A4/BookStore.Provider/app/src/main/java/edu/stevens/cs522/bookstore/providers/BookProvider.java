@@ -200,7 +200,16 @@ public class BookProvider extends ContentProvider {
         // handle requests to delete one or more rows.
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.execSQL(FK_ON);
-        return db.delete(BOOKS_TABLE, selection, selectionArgs);
+        switch (uriMatcher.match(uri)) {
+            case ALL_ROWS:
+                return db.delete(BOOKS_TABLE, selection, selectionArgs);
+            case SINGLE_ROW:
+                selection = BookContract._ID + " = ?";
+                selectionArgs = new String[]{String.valueOf(BookContract.getId(uri))};
+                return db.delete(BOOKS_TABLE, selection, selectionArgs);
+            default:
+                throw new IllegalStateException("delete: bad case");
+        }
     }
 
 }

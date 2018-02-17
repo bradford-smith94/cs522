@@ -7,8 +7,10 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,18 +32,18 @@ import edu.stevens.cs522.bookstore.util.BookAdapter;
 public class MainActivity extends Activity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, LoaderManager.LoaderCallbacks {
 
 	// Use this when logging errors and warnings.
-	@SuppressWarnings("unused")
 	private static final String TAG = MainActivity.class.getCanonicalName();
 
 	// These are request codes for subactivity request calls
 	static final private int ADD_REQUEST = 1;
 
-	@SuppressWarnings("unused")
 	static final private int CHECKOUT_REQUEST = ADD_REQUEST + 1;
 
     static final private int LOADER_ID = 1;
 
     BookAdapter bookAdapter;
+
+    ActionMode actionMode = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,18 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
         // set listeners for item selection and multi-choice CAB
         lv.setOnItemClickListener(this);
+        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         lv.setMultiChoiceModeListener(this);
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (actionMode != null)
+                    return false;
+                actionMode = startActionMode(MainActivity.this);
+                ((ListView)parent).setItemChecked(position, true);
+                return true;
+            }
+        });
 
 
         // use loader manager to initiate a query of the database
@@ -164,12 +177,14 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // query for this book's details, and send to ViewBookActivity
-        // ok to do on main thread for BookStoreWithContentProvider
-        Book book = new Book((Cursor)bookAdapter.getItem(position));
-        Intent viewIntent = new Intent(this, ViewBookActivity.class);
-        viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
-        startActivity(viewIntent);
+        if (actionMode == null) {
+            // query for this book's details, and send to ViewBookActivity
+            // ok to do on main thread for BookStoreWithContentProvider
+            Book book = new Book((Cursor) bookAdapter.getItem(position));
+            Intent viewIntent = new Intent(this, ViewBookActivity.class);
+            viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
+            startActivity(viewIntent);
+        }
     }
 
 
@@ -177,7 +192,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
      * Handle multi-choice action mode for deletion of several books at once
      */
 
-    Set<Long> selected;
+    Set<Integer> selected;
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -185,16 +200,19 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.books_cab, menu);
 
-        selected = new HashSet<Long>();
+        selected = new HashSet<Integer>();
         return true;
     }
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+        ListView lv = (ListView)findViewById(android.R.id.list);
         if (checked) {
-            selected.add(id);
+            selected.add(position);
+            lv.getChildAt(position).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         } else {
-            selected.remove(id);
+            selected.remove(position);
+            lv.getChildAt(position).setBackgroundColor(Color.TRANSPARENT);
         }
     }
 
@@ -202,7 +220,12 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch(item.getItemId()) {
             case R.id.delete:
-                // TODO delete the selected books
+                Log.i(TAG, "delete " + selected.size() + " selected items");
+                for (int position : selected) {
+                    Book book = new Book((Cursor)bookAdapter.getItem(position));
+                    getContentResolver().delete(BookContract.CONTENT_URI(book.id), null, null);
+                }
+                getContentResolver().notifyChange(BookContract.CONTENT_URI, null);
                 return true;
             default:
                 return false;
@@ -216,6 +239,11 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
+        ListView lv = (ListView)findViewById(android.R.id.list);
+        for (int i = 0; i < lv.getChildCount(); i++) {
+            lv.getChildAt(i).setBackgroundColor(Color.TRANSPARENT);
+        }
+        actionMode = null;
     }
 
 }
