@@ -1,10 +1,10 @@
 #!/bin/bash
 # Bradford Smith (bsmith8)
 # CS 522 Assignment 4 submit.sh
-# 02/15/2018
+# 02/17/2018
 
 AUTHOR='Bradford_Smith'
-ASSIGNMENT='assignment3'
+ASSIGNMENT='assignment4'
 ARCHIVE="${AUTHOR}_$ASSIGNMENT.zip"
 TMPDIR=$(mktemp -d)
 PREFIX="$TMPDIR/$AUTHOR"
@@ -24,8 +24,7 @@ while read -r f; do
             dirs=($front/*$arg $front/.$arg)
             rm -r "${dirs[@]}" 2>/dev/null
         else
-            #fail if 'front' is empty to avoid system destruction (SC2115)
-            rm -r "${front:?}/$arg" 2>/dev/null
+            find "$front" -name "$arg" -exec rm -rf {} ';' 2>/dev/null
         fi
     done < "$f"
 done <<< "$GITIGNORES"
@@ -37,14 +36,14 @@ rm "${PREFIX:?}/cs522_${ASSIGNMENT}_spec.pdf"
 #need to enter temp dir for zip to execute
 echo "Entering $TMPDIR"
 #shellcheck disable=SC2164
-pushd "$TMPDIR"
+pushd "$TMPDIR" >/dev/null
 
 echo "Creating archive"
 zip -r "$ARCHIVE" "$AUTHOR"
 
 echo "Leaving $TMPDIR"
 #shellcheck disable=SC2164
-popd
+popd >/dev/null
 
 mv "$TMPDIR/$ARCHIVE" .
 rm -r "$TMPDIR"
