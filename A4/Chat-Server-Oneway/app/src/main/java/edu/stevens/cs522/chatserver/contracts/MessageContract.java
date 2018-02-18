@@ -34,6 +34,8 @@ public class MessageContract extends BaseContract {
 
     public static final String SENDER = "sender";
 
+    public static final String SENDER_ID = "sender_id";
+
     private static int messageTextColumn = -1;
 
     public static String getMessageText(Cursor cursor) {
@@ -71,5 +73,27 @@ public class MessageContract extends BaseContract {
 
     public static void putSender(ContentValues out, String sender) {
         out.put(SENDER, sender);
+    }
+
+    private static int idColumn = -1;
+
+    public static long getId(Cursor cursor) {
+        if (idColumn < 0) {
+            idColumn = cursor.getColumnIndexOrThrow(_ID);
+        }
+        return Long.parseLong(cursor.getString(idColumn));
+    }
+
+    private static int senderIdColumn = -1;
+
+    public static long getSenderId(Cursor cursor) {
+        if (senderIdColumn < 0) {
+            senderIdColumn = cursor.getColumnIndexOrThrow(SENDER_ID);
+        }
+        return Long.parseLong(cursor.getString(senderIdColumn));
+    }
+
+    public static void putSenderId(ContentValues out, long senderId) {
+        out.put(SENDER_ID, senderId);
     }
 }

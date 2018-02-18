@@ -64,17 +64,18 @@ public class Message implements Parcelable {
     }
 
     public Message(Cursor cursor) {
-        //id = MessageContract.getId(cursor);
+        id = MessageContract.getId(cursor);
         messageText = MessageContract.getMessageText(cursor);
         timestamp = new Date(MessageContract.getTimestamp(cursor));
         sender = MessageContract.getSender(cursor);
-        //senderId = ;
+        senderId = MessageContract.getSenderId(cursor);
     }
 
     public void writeToProvider(ContentValues out) {
         MessageContract.putMessageText(out, messageText);
         MessageContract.putTimestamp(out, timestamp.getTime());
         MessageContract.putSender(out, sender);
+        MessageContract.putSenderId(out, senderId);
     }
 
 }
