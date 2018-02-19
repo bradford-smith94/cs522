@@ -28,6 +28,12 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
+
+        <provider
+            android:name=".providers.ChatProvider"
+            android:authorities="edu.stevens.cs522.chatserver"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

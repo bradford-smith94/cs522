@@ -198,6 +198,7 @@ public class ChatServer extends Activity implements OnClickListener, LoaderManag
             Cursor cursor = getContentResolver().query(PeerContract.CONTENT_URI, null, PeerContract.NAME + " = ?", new String[]{sender.name}, null, null);
             ContentValues values = new ContentValues();
             if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
                 sender.id = new Peer(cursor).id;
                 sender.writeToProvider(values);
                 message.senderId = sender.id;
