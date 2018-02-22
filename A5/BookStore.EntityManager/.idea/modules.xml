@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BookStore.EntityManager.iml" filepath="$PROJECT_DIR$/BookStore.EntityManager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A5/BookStore.EntityManager/BookStore.EntityManager.iml" filepath="$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A5/BookStore.EntityManager/BookStore.EntityManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A5/BookStore.EntityManager/app/app.iml" filepath="$PROJECT_DIR$/../../../../../School/College/10th-Sem-2018S/CS-522-Mobile-Sys-and-Apps/Work/A5/BookStore.EntityManager/app/app.iml" />
     </modules>
   </component>
 </project>

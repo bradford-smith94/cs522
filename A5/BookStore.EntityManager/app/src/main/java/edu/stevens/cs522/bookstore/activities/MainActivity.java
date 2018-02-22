@@ -23,35 +23,49 @@ import edu.stevens.cs522.bookstore.managers.TypedCursor;
 import edu.stevens.cs522.bookstore.util.BookAdapter;
 
 public class MainActivity extends Activity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, IQueryListener {
-	
-	// Use this when logging errors and warnings.
-	@SuppressWarnings("unused")
-	private static final String TAG = MainActivity.class.getCanonicalName();
-	
-	// These are request codes for subactivity request calls
-	static final private int ADD_REQUEST = 1;
-	
-	@SuppressWarnings("unused")
-	static final private int CHECKOUT_REQUEST = ADD_REQUEST + 1;
+
+    // Use this when logging errors and warnings.
+    @SuppressWarnings("unused")
+    private static final String TAG = MainActivity.class.getCanonicalName();
+
+    // These are request codes for subactivity request calls
+    static final private int ADD_REQUEST = 1;
+
+    static final private int CHECKOUT_REQUEST = ADD_REQUEST + 1;
 
     private BookManager bookManager;
 
     private BookAdapter bookAdapter;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    private ActionMode actionMode = null;
 
-		// TODO check if there is saved UI state, and if so, restore it (i.e. the cart contents)
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// TODO Set the layout (use cart.xml layout)
+        // Set the layout (use cart.xml layout)
+        setContentView(R.layout.cart);
 
         // Use a custom cursor adapter to display an empty (null) cursor.
         bookAdapter = new BookAdapter(this, null);
         ListView lv = (ListView) findViewById(android.R.id.list);
+        lv.setEmptyView(findViewById(R.id.cart_empty));
         lv.setAdapter(bookAdapter);
 
-        // TODO Set listeners for item selection and multi-choice CAB
+        // Set listeners for item selection and multi-choice CAB
+        lv.setOnItemClickListener(this);
+        lv.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        lv.setMultiChoiceModeListener(this);
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (actionMode != null)
+                    return false;
+                actionMode = startActionMode(MainActivity.this);
+                ((ListView) parent).setItemChecked(position, true);
+                return true;
+            }
+        });
 
 
         // Initialize the book manager and query for all books
@@ -59,28 +73,32 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         bookManager.getAllBooksAsync(this);
     }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		// TODO inflate a menu with ADD and CHECKOUT options
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        // inflate a menu with ADD and CHECKOUT options
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bookstore_menu, menu);
 
         return true;
-	}
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		super.onOptionsItemSelected(item);
-        switch(item.getItemId()) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
 
-            // TODO ADD provide the UI for adding a book
+            // ADD provide the UI for adding a book
             case R.id.add:
-                // Intent addIntent = new Intent(this, AddBookActivity.class);
-                // startActivityForResult(addIntent, ADD_REQUEST);
+                Intent addIntent = new Intent(this, AddBookActivity.class);
+                startActivityForResult(addIntent, ADD_REQUEST);
                 break;
 
-            // TODO CHECKOUT provide the UI for checking out
+            // CHECKOUT provide the UI for checking out
             case R.id.checkout:
+                Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
+                //TODO: pass number of books to checkout
+                startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
             default:
@@ -88,31 +106,31 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         return false;
     }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-		// TODO Handle results from the Search and Checkout activities.
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        // TODO Handle results from the Add and Checkout activities.
 
-        // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
-        switch(requestCode) {
-            case ADD_REQUEST:
-                // ADD: add the book that is returned to the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
-                break;
-            case CHECKOUT_REQUEST:
-                // CHECKOUT: empty the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
-                break;
+        if (resultCode == RESULT_OK) {
+            // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
+            switch (requestCode) {
+                case ADD_REQUEST:
+                    // ADD: add the book that is returned to the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    break;
+                case CHECKOUT_REQUEST:
+                    // CHECKOUT: empty the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    break;
+            }
         }
 
-	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// TODO save the shopping cart contents (which should be a list of parcelables).
-		
-	}
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+    }
 
     /*
      * TODO Query listener callbacks
@@ -148,7 +166,9 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        // TODO inflate the menu for the CAB
+        // inflate the menu for the CAB
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.books_cab, menu);
 
         selected = new HashSet<Long>();
         return true;
@@ -165,7 +185,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.delete:
                 // TODO delete the selected books
                 return true;
@@ -181,6 +201,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
+        actionMode = null;
     }
 
 }

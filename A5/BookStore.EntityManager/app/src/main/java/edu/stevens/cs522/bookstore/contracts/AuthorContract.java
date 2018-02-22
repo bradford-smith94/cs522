@@ -20,17 +20,28 @@ public class AuthorContract implements BaseColumns {
 
     private static int nameColumn = -1;
 
-    public static String getFirstName(Cursor cursor) {
+    public static String getName(Cursor cursor) {
         if (nameColumn < 0) {
-            nameColumn =  cursor.getColumnIndexOrThrow(NAME);;
+            nameColumn = cursor.getColumnIndexOrThrow(NAME);
         }
         return cursor.getString(nameColumn);
     }
 
-    public static void putFirstName(ContentValues values, String firstName) {
+    public static void putName(ContentValues values, String firstName) {
         values.put(NAME, firstName);
     }
 
-    // TODO complete the definitions of the operations for Parcelable, cursors and contentvalues
+    /*
+     * ID column
+     */
+
+    private static int idColumn = -1;
+
+    public static long getId(Cursor cursor) {
+        if (idColumn < 0) {
+            idColumn = cursor.getColumnIndexOrThrow(ID);
+        }
+        return cursor.getLong(idColumn);
+    }
 
 }
