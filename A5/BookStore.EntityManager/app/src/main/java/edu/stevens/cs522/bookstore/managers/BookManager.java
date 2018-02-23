@@ -1,7 +1,9 @@
 package edu.stevens.cs522.bookstore.managers;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import java.util.Set;
 
@@ -9,6 +11,7 @@ import edu.stevens.cs522.bookstore.async.AsyncContentResolver;
 import edu.stevens.cs522.bookstore.async.IContinue;
 import edu.stevens.cs522.bookstore.async.IEntityCreator;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
+import edu.stevens.cs522.bookstore.async.SimpleQueryBuilder;
 import edu.stevens.cs522.bookstore.contracts.AuthorContract;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
 import edu.stevens.cs522.bookstore.entities.Book;
@@ -43,8 +46,15 @@ public class BookManager extends Manager<Book> {
         // TODO
     }
 
-    public void persistAsync(Book book) {
-        // TODO
+    public void persistAsync(final Book book) {
+        ContentValues values = new ContentValues();
+        book.writeToProvider(values);
+        contentResolver.insertAsync(BookContract.CONTENT_URI, values, new IContinue<Uri>() {
+            @Override
+            public void kontinue(Uri uri) {
+                book.id = BookContract.getId(uri);
+            }
+        });
     }
 
     public void deleteBooksAsync(Set<Long> toBeDeleted) {
@@ -57,7 +67,7 @@ public class BookManager extends Manager<Book> {
             sb.append(AuthorContract.ID);
             sb.append("=?");
             args[0] = ids[0].toString();
-            for (int ix=1; ix<ids.length; ix++) {
+            for (int ix = 1; ix < ids.length; ix++) {
                 sb.append(" or ");
                 sb.append(AuthorContract.ID);
                 sb.append("=?");
