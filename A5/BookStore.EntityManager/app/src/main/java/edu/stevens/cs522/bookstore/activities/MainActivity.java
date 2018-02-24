@@ -3,6 +3,7 @@ package edu.stevens.cs522.bookstore.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
@@ -165,7 +166,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (actionMode == null) {
             // query for this book's details, and send to ViewBookActivity
-            Book book = new Book((Cursor)bookAdapter.getItem(position));
+            Book book = new Book((Cursor) bookAdapter.getItem(position));
             Intent viewIntent = new Intent(this, ViewBookActivity.class);
             viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
             startActivity(viewIntent);
@@ -191,10 +192,13 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+        ListView lv = (ListView) findViewById(android.R.id.list);
         if (checked) {
             selected.add(id);
+            lv.getChildAt(position).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         } else {
             selected.remove(id);
+            lv.getChildAt(position).setBackgroundColor(Color.TRANSPARENT);
         }
     }
 
