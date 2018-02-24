@@ -10,6 +10,7 @@ import java.util.Set;
 import edu.stevens.cs522.bookstore.async.AsyncContentResolver;
 import edu.stevens.cs522.bookstore.async.IContinue;
 import edu.stevens.cs522.bookstore.async.IEntityCreator;
+import edu.stevens.cs522.bookstore.async.QueryBuilder;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
 import edu.stevens.cs522.bookstore.async.SimpleQueryBuilder;
 import edu.stevens.cs522.bookstore.contracts.AuthorContract;
@@ -39,11 +40,17 @@ public class BookManager extends Manager<Book> {
     }
 
     public void getAllBooksAsync(IQueryListener<Book> listener) {
-        // TODO use QueryBuilder to complete this
+        // use QueryBuilder to complete this
+        executeQuery(BookContract.CONTENT_URI, null, null, null, listener);
     }
 
-    public void getBookAsync(long id, IContinue<Book> callback) {
-        // TODO
+    // NOTE: callback was originally of type Book, made it type cursor to match
+    // the signature of AsyncContentResolver
+    public void getBookAsync(long id, IContinue<Cursor> callback) {
+        String selection = BookContract._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(id)};
+        contentResolver.queryAsync(BookContract.CONTENT_URI, null, selection,
+                selectionArgs, null, callback);
     }
 
     public void persistAsync(final Book book) {

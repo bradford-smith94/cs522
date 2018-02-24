@@ -69,6 +69,22 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
         lm.initLoader(loaderID, null, qb);
     }
 
+    public static <T> void reexecuteQuery(String tag,
+                                        Activity context,
+                                        Uri uri,
+                                        String[] projection,
+                                        String selection,
+                                        String[] selectionArgs,
+                                        int loaderID,
+                                        IEntityCreator<T> creator,
+                                        IQueryListener<T> listener) {
+        QueryBuilder<T> qb = new QueryBuilder<>(tag, context, uri, projection,
+                selection, selectionArgs, loaderID, creator, listener);
+        LoaderManager lm = context.getLoaderManager();
+        lm.restartLoader(loaderID, null, qb);
+        lm.initLoader(loaderID, null, qb);
+    }
+
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         if (id == loaderID) {
