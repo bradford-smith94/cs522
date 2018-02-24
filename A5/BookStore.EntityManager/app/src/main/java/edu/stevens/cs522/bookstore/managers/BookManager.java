@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.Set;
 
@@ -36,12 +37,17 @@ public class BookManager extends Manager<Book> {
 
     public BookManager(Context context) {
         super(context, creator, LOADER_ID);
-        contentResolver = new AsyncContentResolver(context.getContentResolver());
+        contentResolver = getAsyncResolver();
     }
 
     public void getAllBooksAsync(IQueryListener<Book> listener) {
         // use QueryBuilder to complete this
         executeQuery(BookContract.CONTENT_URI, null, null, null, listener);
+    }
+
+    public void refreshAllBooksAsync(IQueryListener<Book> listener) {
+        // use QueryBuilder to complete this
+        reexecuteQuery(BookContract.CONTENT_URI, null, null, null, listener);
     }
 
     // NOTE: callback was originally of type Book, made it type cursor to match
@@ -59,9 +65,14 @@ public class BookManager extends Manager<Book> {
         contentResolver.insertAsync(BookContract.CONTENT_URI, values, new IContinue<Uri>() {
             @Override
             public void kontinue(Uri uri) {
+                Log.i(tag, " successfully added book");
                 book.id = BookContract.getId(uri);
             }
         });
+    }
+
+    public void deleteAllBooksAsync() {
+        contentResolver.deleteAsync(BookContract.CONTENT_URI, null, null);
     }
 
     public void deleteBooksAsync(Set<Long> toBeDeleted) {
@@ -71,12 +82,12 @@ public class BookManager extends Manager<Book> {
 
         StringBuilder sb = new StringBuilder();
         if (ids.length > 0) {
-            sb.append(AuthorContract.ID);
+            sb.append(BookContract._ID);
             sb.append("=?");
             args[0] = ids[0].toString();
             for (int ix = 1; ix < ids.length; ix++) {
                 sb.append(" or ");
-                sb.append(AuthorContract.ID);
+                sb.append(BookContract._ID);
                 sb.append("=?");
                 args[ix] = ids[ix].toString();
             }

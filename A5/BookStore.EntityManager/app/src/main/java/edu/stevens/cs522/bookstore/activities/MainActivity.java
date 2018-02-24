@@ -2,7 +2,9 @@ package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +20,7 @@ import java.util.Set;
 
 import edu.stevens.cs522.bookstore.R;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
+import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.managers.BookManager;
 import edu.stevens.cs522.bookstore.managers.TypedCursor;
 import edu.stevens.cs522.bookstore.util.BookAdapter;
@@ -25,7 +28,6 @@ import edu.stevens.cs522.bookstore.util.BookAdapter;
 public class MainActivity extends Activity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, IQueryListener {
 
     // Use this when logging errors and warnings.
-    @SuppressWarnings("unused")
     private static final String TAG = MainActivity.class.getCanonicalName();
 
     // These are request codes for subactivity request calls
@@ -97,7 +99,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
             // CHECKOUT provide the UI for checking out
             case R.id.checkout:
                 Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
-                //TODO: pass number of books to checkout
+                checkoutIntent.putExtra(CheckoutActivity.NUM_BOOKS_KEY, bookAdapter.getCount());
                 startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
                 break;
 
@@ -110,18 +112,22 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        // TODO Handle results from the Add and Checkout activities.
+        // Handle results from the Add and Checkout activities.
 
         if (resultCode == RESULT_OK) {
             // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
             switch (requestCode) {
                 case ADD_REQUEST:
                     // ADD: add the book that is returned to the shopping cart.
-                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    Book book = intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
+                    Log.i(TAG, " adding a book");
+                    bookManager.persistAsync(book);
+                    bookManager.refreshAllBooksAsync(this);
                     break;
                 case CHECKOUT_REQUEST:
                     // CHECKOUT: empty the shopping cart.
-                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    bookManager.deleteAllBooksAsync();
+                    bookManager.refreshAllBooksAsync(this);
                     break;
             }
         }
@@ -133,17 +139,21 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     }
 
     /*
-     * TODO Query listener callbacks
+     * Query listener callbacks
      */
 
     @Override
     public void handleResults(TypedCursor results) {
-        // TODO update the adapter
+        // update the adapter
+        Log.i(TAG, " handling results");
+        bookAdapter.swapCursor(results.getCursor());
     }
 
     @Override
     public void closeResults() {
-        // TODO update the adapter
+        // update the adapter
+        Log.i(TAG, " closing results");
+        bookAdapter.swapCursor(null);
     }
 
 
@@ -153,8 +163,13 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO query for this book's details, and send to ViewBookActivity
-        // ok to do on main thread for BookStoreWithContentProvider
+        if (actionMode == null) {
+            // query for this book's details, and send to ViewBookActivity
+            Book book = new Book((Cursor)bookAdapter.getItem(position));
+            Intent viewIntent = new Intent(this, ViewBookActivity.class);
+            viewIntent.putExtra(ViewBookActivity.BOOK_KEY, book);
+            startActivity(viewIntent);
+        }
     }
 
 
@@ -187,7 +202,9 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.delete:
-                // TODO delete the selected books
+                // delete the selected books
+                bookManager.deleteBooksAsync(selected);
+                bookManager.refreshAllBooksAsync(this);
                 return true;
             default:
                 return false;

@@ -22,7 +22,7 @@ public abstract class Manager<T> {
 
     private final int loaderID;
 
-    private final String tag;
+    protected final String tag;
 
     protected Manager(Context context,
                       IEntityCreator<T> creator,
@@ -54,7 +54,7 @@ public abstract class Manager<T> {
                                       String selection,
                                       String[] selectionArgs,
                                       SimpleQueryBuilder.ISimpleQueryListener<T> listener) {
-        SimpleQueryBuilder.executeQuery((Activity)context,
+        SimpleQueryBuilder.executeQuery((Activity) context,
                 uri, projection, selection, selectionArgs, creator, listener);
     }
 
@@ -63,7 +63,7 @@ public abstract class Manager<T> {
                                 String selection,
                                 String[] selectionArgs,
                                 QueryBuilder.IQueryListener<T> listener) {
-        QueryBuilder.executeQuery(tag, (Activity)context, uri, projection,
+        QueryBuilder.executeQuery(tag, (Activity) context, uri, projection,
                 selection, selectionArgs, loaderID, creator, listener);
     }
 

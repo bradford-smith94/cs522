@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import edu.stevens.cs522.bookstore.managers.TypedCursor;
 
@@ -25,6 +26,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
 
     }
 
+    private String tag;
     private Context context;
     private Uri uri;
     private String[] projection;
@@ -44,6 +46,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
                          int loaderID,
                          IEntityCreator<T> creator,
                          IQueryListener<T> listener) {
+        this.tag = tag;
         this.context = context;
         this.uri = uri;
         this.projection = projection;
@@ -82,7 +85,6 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
                 selection, selectionArgs, loaderID, creator, listener);
         LoaderManager lm = context.getLoaderManager();
         lm.restartLoader(loaderID, null, qb);
-        lm.initLoader(loaderID, null, qb);
     }
 
     @Override
@@ -102,6 +104,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
     @Override
     public void onLoadFinished(Loader loader, Object data) {
         if (loader.getId() == loaderID) {
+            Log.i(tag, " calling handleResults callback");
             listener.handleResults(new TypedCursor<T>((Cursor) data, creator));
         } else {
             throw new IllegalStateException("Unexpected loader callback");
@@ -111,6 +114,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks {
     @Override
     public void onLoaderReset(Loader loader) {
         if (loader.getId() == loaderID) {
+            Log.i(tag, " calling closeResults callback");
             listener.closeResults();
         } else {
             throw new IllegalStateException("Unexpected loader callback");

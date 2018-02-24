@@ -177,15 +177,22 @@ public class BookProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         db.execSQL(FK_ON);
+        ContentResolver cr = getContext().getContentResolver();
+        Cursor cursor;
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // handle query of all books.
-                return db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, sortOrder);
+                cursor = db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, sortOrder);
+                cursor.setNotificationUri(cr, BookContract.CONTENT_URI);
+                return cursor;
             case SINGLE_ROW:
                 // handle query of a specific book.
                 selection = _ID + " = ?";
                 selectionArgs = new String[]{String.valueOf(BookContract.getId(uri))};
-                return db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, null);
+
+                cursor = db.query(BOOKS_JOIN_AUTHORS, BOOK_PROJECTION, selection, selectionArgs, GROUPBY, null, null);
+                cursor.setNotificationUri(cr, BookContract.CONTENT_URI);
+                return cursor;
             default:
                 throw new IllegalStateException("query: bad case");
         }
