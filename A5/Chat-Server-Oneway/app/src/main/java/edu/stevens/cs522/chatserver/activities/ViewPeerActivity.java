@@ -3,6 +3,7 @@ package edu.stevens.cs522.chatserver.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import edu.stevens.cs522.chatserver.R;
 import edu.stevens.cs522.chatserver.async.IContinue;
@@ -29,8 +30,14 @@ public class ViewPeerActivity extends Activity {
             throw new IllegalArgumentException("Expected peer as intent extra");
         }
 
-        // TODO init the UI
-
+        TextView textView = (TextView) findViewById(R.id.view_user_name);
+        textView.setText(peer.name);
+        textView = (TextView) findViewById(R.id.view_timestamp);
+        textView.setText(peer.timestamp.toString());
+        textView = (TextView) findViewById(R.id.view_address);
+        textView.setText(peer.address.toString());
+        textView = (TextView) findViewById(R.id.view_port);
+        textView.setText(String.valueOf(peer.port));
     }
 
 }

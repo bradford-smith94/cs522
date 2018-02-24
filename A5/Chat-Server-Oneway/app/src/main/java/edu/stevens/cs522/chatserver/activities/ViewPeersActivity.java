@@ -10,16 +10,13 @@ import android.widget.SimpleCursorAdapter;
 
 import edu.stevens.cs522.chatserver.R;
 import edu.stevens.cs522.chatserver.async.QueryBuilder;
+import edu.stevens.cs522.chatserver.contracts.PeerContract;
 import edu.stevens.cs522.chatserver.entities.Peer;
 import edu.stevens.cs522.chatserver.managers.PeerManager;
 import edu.stevens.cs522.chatserver.managers.TypedCursor;
 
 
 public class ViewPeersActivity extends Activity implements AdapterView.OnItemClickListener, QueryBuilder.IQueryListener<Peer> {
-
-    /*
-     * TODO See ChatServer for example of what to do, query peers database instead of messages database.
-     */
 
     private PeerManager peerManager;
 
@@ -30,7 +27,10 @@ public class ViewPeersActivity extends Activity implements AdapterView.OnItemCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_peers);
 
-        // TODO initialize peerAdapter with empty cursor (null)
+        // initialize peerAdapter with empty cursor (null)
+        String[] from = {PeerContract.NAME};
+        int[] to = {android.R.id.text1};
+        peerAdapter = new SimpleCursorAdapter(this, R.layout.message, null, from, to);
 
         peerManager = new PeerManager(this);
         peerManager.getAllPeersAsync(this);
