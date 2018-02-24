@@ -58,8 +58,6 @@ public class ChatServer extends Activity implements OnClickListener, QueryBuilde
     /*
      * UI for displayed received messages
      */
-    private SimpleCursorAdapter messages;
-
     private ListView messageList;
 
     private SimpleCursorAdapter messagesAdapter;
@@ -122,9 +120,10 @@ public class ChatServer extends Activity implements OnClickListener, QueryBuilde
         next = (Button) findViewById(R.id.next);
         next.setOnClickListener(this);
 
-        // TODO create the message and peer managers, and initiate a query for all messages
-
-
+        // create the message and peer managers, and initiate a query for all messages
+        messageManager = new MessageManager(this);
+        peerManager = new PeerManager(this);
+        messageManager.getAllMessagesAsync(this);
     }
 
     public void onDestroy() {
@@ -226,11 +225,11 @@ public class ChatServer extends Activity implements OnClickListener, QueryBuilde
 
     @Override
     public void handleResults(TypedCursor<Message> results) {
-        // TODO
+        messagesAdapter.swapCursor(results.getCursor());
     }
 
     @Override
     public void closeResults() {
-        // TODO
+        messagesAdapter.swapCursor(null);
     }
 }

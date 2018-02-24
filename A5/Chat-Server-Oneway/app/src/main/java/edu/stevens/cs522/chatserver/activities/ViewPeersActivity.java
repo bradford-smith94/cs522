@@ -56,11 +56,11 @@ public class ViewPeersActivity extends Activity implements AdapterView.OnItemCli
 
     @Override
     public void handleResults(TypedCursor<Peer> results) {
-        // TODO
+        peerAdapter.swapCursor(results.getCursor());
     }
 
     @Override
     public void closeResults() {
-        // TODO
+        peerAdapter.swapCursor(null);
     }
 }
