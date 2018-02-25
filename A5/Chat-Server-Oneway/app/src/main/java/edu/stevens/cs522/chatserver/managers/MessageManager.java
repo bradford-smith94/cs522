@@ -1,7 +1,9 @@
 package edu.stevens.cs522.chatserver.managers;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import java.util.Set;
 
@@ -34,15 +36,23 @@ public class MessageManager extends Manager<Message> {
 
     public MessageManager(Context context) {
         super(context, creator, LOADER_ID);
-        contentResolver = new AsyncContentResolver(context.getContentResolver());
+        contentResolver = getAsyncResolver();
     }
 
     public void getAllMessagesAsync(IQueryListener<Message> listener) {
-        // TODO use QueryBuilder to complete this
+        // use QueryBuilder to complete this
+        executeQuery(MessageContract.CONTENT_URI, null, null, null, listener);
     }
 
-    public void persistAsync(Message Message) {
-        // TODO
+    public void persistAsync(final Message message) {
+        ContentValues values = new ContentValues();
+        message.writeToProvider(values);
+        contentResolver.insertAsync(MessageContract.CONTENT_URI, values, new IContinue<Uri>() {
+            @Override
+            public void kontinue(Uri uri) {
+                message.id = MessageContract.getId(uri);
+            }
+        });
     }
 
 }

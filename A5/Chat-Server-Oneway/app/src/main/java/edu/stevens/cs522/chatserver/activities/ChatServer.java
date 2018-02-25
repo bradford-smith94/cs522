@@ -110,7 +110,7 @@ public class ChatServer extends Activity implements OnClickListener, QueryBuilde
 
         // use SimpleCursorAdapter to display the messages received.
         String[] from = { MessageContract.MESSAGE_TEXT};
-        int[] to = {android.R.id.text1};
+        int[] to = {R.id.messageText};
         messagesAdapter = new SimpleCursorAdapter(this, R.layout.message, null, from, to);
 
         messageList = (ListView)findViewById(R.id.message_list);
