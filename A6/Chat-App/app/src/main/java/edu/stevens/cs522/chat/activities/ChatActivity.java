@@ -1,7 +1,7 @@
 /*********************************************************************
 
     Chat server: accept chat messages from clients.
-    
+
     Sender name and GPS coordinates are encoded
     in the messages, and stripped off upon receipt.
 
@@ -49,12 +49,12 @@ import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
 public class ChatActivity extends Activity implements OnClickListener, QueryBuilder.IQueryListener<ChatMessage>, ServiceConnection, ResultReceiverWrapper.IReceive {
 
 	final static public String TAG = ChatActivity.class.getCanonicalName();
-		
+
     /*
      * UI for displaying received messages
      */
 	private SimpleCursorAdapter messages;
-	
+
 	private ListView messageList;
 
     private SimpleCursorAdapter messagesAdapter;
@@ -89,9 +89,9 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
      * For receiving ack when message is sent.
      */
     private ResultReceiverWrapper sendResultReceiver;
-	
+
 	/*
-	 * Called when the activity is first created. 
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -108,9 +108,18 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
         setContentView(R.layout.messages);
 
-        // TODO use SimpleCursorAdapter to display the messages received.
+        // use SimpleCursorAdapter to display the messages received.
+        String[] from = { MessageContract.MESSAGE_TEXT};
+        int[] to = {R.id.messageText};
+        messagesAdapter = new SimpleCursorAdapter(this, R.layout.message, null, from, to);
 
-        // TODO create the message and peer managers, and initiate a query for all messages
+        messageList = (ListView)findViewById(R.id.message_list);
+        messageList.setAdapter(messagesAdapter);
+
+        // create the message and peer managers, and initiate a query for all messages
+        messageManager = new MessageManager(this);
+        peerManager = new PeerManager(this);
+        messageManager.getAllMessagesAsync(this);
 
         // TODO initiate binding to the service
 
@@ -135,8 +144,9 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        // TODO inflate a menu with PEERS and SETTINGS options
-
+        // inflate a menu with PEERS and SETTINGS options
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chatserver_menu, menu);
 
         return true;
     }
@@ -146,12 +156,16 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         super.onOptionsItemSelected(item);
         switch(item.getItemId()) {
 
-            // TODO PEERS provide the UI for viewing list of peers
+            // PEERS provide the UI for viewing list of peers
             case R.id.peers:
+                Intent viewPeersIntent = new Intent(this, ViewPeersActivity.class);
+                startActivity(viewPeersIntent);
                 break;
 
-            // TODO SETTINGS provide the UI for settings
+            // SETTINGS provide the UI for settings
             case R.id.settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 break;
 
             default:
@@ -206,12 +220,12 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
     @Override
     public void handleResults(TypedCursor<ChatMessage> results) {
-        // TODO
+        messagesAdapter.swapCursor(results.getCursor());
     }
 
     @Override
     public void closeResults() {
-        // TODO
+        messagesAdapter.swapCursor(null);
     }
 
     @Override
