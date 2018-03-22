@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -208,14 +209,19 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
     @Override
     public void onReceiveResult(int resultCode, Bundle data) {
+        String text;
         switch (resultCode) {
             case RESULT_OK:
-                // TODO show a success toast message
+                // show a success toast message
+                text = getString(R.string.send_success);
                 break;
             default:
-                // TODO show a failure toast message
+                // show a failure toast message
+                text = getString(R.string.send_failure);
                 break;
         }
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override

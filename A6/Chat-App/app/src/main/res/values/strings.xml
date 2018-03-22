@@ -36,4 +36,7 @@
     <string name="default_user_name">client</string>
     <string name="default_app_port">6666</string>
 
+    <string name="send_success">Message Sent!</string>
+    <string name="send_failure">Message failed to send!</string>
+
 </resources>
