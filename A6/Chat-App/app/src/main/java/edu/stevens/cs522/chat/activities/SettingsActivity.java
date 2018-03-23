@@ -14,7 +14,7 @@ public class SettingsActivity extends Activity {
 
     public static final String USERNAME_KEY = "username";
 
-    public static final String APP_PORT_KEY = "app_port";
+    public static final String APP_PORT_KEY = "chat_port";
 
     public static final String DEFAULT_USERNAME = "user";
 
