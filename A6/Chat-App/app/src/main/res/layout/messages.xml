@@ -14,6 +14,7 @@
             android:layout_width="0dp"
             android:layout_weight="0.5"
             android:text="@string/destination_host"
+            android:labelFor="@+id/destination_host"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -37,6 +38,7 @@
             android:layout_width="0dp"
             android:layout_weight="0.5"
             android:text="@string/destination_port"
+            android:labelFor="@+id/destination_port"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText

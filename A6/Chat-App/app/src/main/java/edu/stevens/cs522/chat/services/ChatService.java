@@ -77,9 +77,10 @@ public class ChatService extends Service implements IChatService, SharedPreferen
             throw ex;
         }
 
-        // TODO initialize the thread that sends messages
-
-        // end TODO
+        // initialize the thread that sends messages
+        HandlerThread senderThread = new HandlerThread(SEND_TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        senderThread.start();
+        sendHandler = new SendHandler(senderThread.getLooper());
 
         /*
          * This is the thread that receives messages.
@@ -129,7 +130,17 @@ public class ChatService extends Service implements IChatService, SharedPreferen
     @Override
     public void send(InetAddress destAddress, int destPort, String sender, String messageText, ResultReceiver receiver) {
         Message message = sendHandler.obtainMessage();
-        // TODO send the message to the sending thread
+
+        Bundle data = new Bundle();
+        data.putSerializable(SendHandler.DEST_ADDRESS, destAddress);
+        data.putSerializable(SendHandler.DEST_PORT, destPort);
+        data.putSerializable(SendHandler.CHAT_NAME, sender);
+        data.putSerializable(SendHandler.CHAT_MESSAGE, messageText);
+        data.putParcelable(SendHandler.RECEIVER, receiver);
+        message.setData(data);
+
+        // send the message to the sending thread
+        sendHandler.sendMessage(message);
 
     }
 
@@ -158,9 +169,30 @@ public class ChatService extends Service implements IChatService, SharedPreferen
 
                 ResultReceiver receiver = null;
 
-                // TODO get data from message (including result receiver)
+                // get data from message (including result receiver)
+                Bundle data = message.getData();
+                destAddr = (InetAddress) data.getSerializable(DEST_ADDRESS);
+                destPort = (int) data.getSerializable(DEST_PORT);
+                String username = (String) data.getSerializable(CHAT_NAME);
+                String messageText = (String) data.getSerializable(CHAT_MESSAGE);
+                receiver = data.getParcelable(RECEIVER);
 
-                // End todo
+                // combine data in sendData
+                long now = new Date().getTime();
+                String sep = new String(":");
+                sendData = new byte[username.length() + messageText.length() + String.valueOf(now).length() + 2];
+                int i = 0;
+                for (int j = 0; j < username.length(); j++) {
+                    sendData[i++] = username.getBytes("UTF-8")[j];
+                }
+                sendData[i++] = sep.getBytes("UTF-8")[0];
+                for (int j = 0; j < String.valueOf(now).length(); j++) {
+                    sendData[i++] = String.valueOf(now).getBytes("UTF-8")[j];
+                }
+                sendData[i++] = sep.getBytes("UTF-8")[0];
+                for (int j = 0; j < messageText.length(); j++) {
+                    sendData[i++] = messageText.toString().getBytes("UTF-8")[j];
+                }
 
                 DatagramPacket sendPacket = new DatagramPacket(sendData,
                         sendData.length, destAddr, destPort);
@@ -170,7 +202,6 @@ public class ChatService extends Service implements IChatService, SharedPreferen
                 Log.i(TAG, "Sent packet: " + new String(sendData));
 
                 receiver.send(RESULT_OK, null);
-
 
             } catch (UnknownHostException e) {
                 Log.e(TAG, "Unknown host exception: " + e.getMessage());
