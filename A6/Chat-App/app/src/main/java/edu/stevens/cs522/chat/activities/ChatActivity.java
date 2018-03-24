@@ -107,9 +107,9 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         setContentView(R.layout.messages);
 
         // use SimpleCursorAdapter to display the messages received.
-        String[] from = {MessageContract.MESSAGE_TEXT};
-        int[] to = {R.id.messageText};
-        messagesAdapter = new SimpleCursorAdapter(this, R.layout.message, null, from, to);
+        String[] from = {MessageContract.SENDER, MessageContract.MESSAGE_TEXT};
+        int[] to = {R.id.senderName, R.id.messageText};
+        messagesAdapter = new SimpleCursorAdapter(this, R.layout.message_with_sender, null, from, to);
 
         messageList = (ListView) findViewById(R.id.message_list);
         messageList.setAdapter(messagesAdapter);
