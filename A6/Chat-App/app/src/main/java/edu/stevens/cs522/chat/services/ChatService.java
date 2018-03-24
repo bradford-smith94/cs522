@@ -1,8 +1,12 @@
 package edu.stevens.cs522.chat.services;
 
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +28,8 @@ import java.util.Date;
 
 import edu.stevens.cs522.chat.activities.SettingsActivity;
 import edu.stevens.cs522.chat.async.IContinue;
+import edu.stevens.cs522.chat.contracts.MessageContract;
+import edu.stevens.cs522.chat.contracts.PeerContract;
 import edu.stevens.cs522.chat.entities.ChatMessage;
 import edu.stevens.cs522.chat.entities.Peer;
 import edu.stevens.cs522.chat.managers.MessageManager;
@@ -53,9 +59,10 @@ public class ChatService extends Service implements IChatService, SharedPreferen
 
     protected boolean finished = false;
 
+    /*
     PeerManager peerManager;
-
     MessageManager messageManager;
+    */
 
     protected int chatPort;
 
@@ -66,8 +73,10 @@ public class ChatService extends Service implements IChatService, SharedPreferen
         chatPort = prefs.getInt(SettingsActivity.APP_PORT_KEY, SettingsActivity.DEFAULT_APP_PORT);
         prefs.registerOnSharedPreferenceChangeListener(this);
 
+        /*
         peerManager = new PeerManager(this);
         messageManager = new MessageManager(this);
+        */
 
         try {
             chatSocket = new DatagramSocket(chatPort);
@@ -244,6 +253,7 @@ public class ChatService extends Service implements IChatService, SharedPreferen
                     sender.address = receivePacket.getAddress();
                     sender.port = receivePacket.getPort();
 
+                    /* Note: can't use Entity Managers because we don't have an Activity Context
                     peerManager.persistAsync(sender, new IContinue<Long>() {
                         @Override
                         public void kontinue(Long id) {
@@ -251,6 +261,29 @@ public class ChatService extends Service implements IChatService, SharedPreferen
                             messageManager.persistAsync(message);
                         }
                     });
+                    */
+
+                    // Same as above but with synchronous ContentResolver (shouldn't matter because we're in the background anyway)
+                    ContentResolver resolver = getContentResolver();
+                    String selection = PeerContract.NAME + " = ?";
+                    String[] selectionArgs = {sender.name};
+                    Cursor c = resolver.query(PeerContract.CONTENT_URI, null, selection, selectionArgs, null);
+                    ContentValues values = new ContentValues();
+                    if (c != null && c.getCount() > 0) {
+                        c.moveToFirst();
+                        Peer p = new Peer(c);
+                        sender.id = p.id;
+                        sender.writeToProvider(values);
+                        resolver.update(PeerContract.CONTENT_URI(sender.id), values, null, null);
+                    } else {
+                        sender.writeToProvider(values);
+                        Uri uri = resolver.insert(PeerContract.CONTENT_URI, values);
+                        sender.id = PeerContract.getId(uri);
+                    }
+                    values = new ContentValues();
+                    message.senderId = sender.id;
+                    message.writeToProvider(values);
+                    resolver.insert(MessageContract.CONTENT_URI, values);
 
                 } catch (Exception e) {
 
