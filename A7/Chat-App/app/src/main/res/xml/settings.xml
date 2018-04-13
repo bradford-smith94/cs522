@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextViewPreference
+        android:key="username"
+        android:title="@string/user_name_pref"
+        android:summary="@string/user_name_summary" />
+    <TextViewPreference
+        android:key="client-id"
+        android:title="@string/client_id_pref"
+        android:summary="@string/client_id_summary" />
+</PreferenceScreen>
