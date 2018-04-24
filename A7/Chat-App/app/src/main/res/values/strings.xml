@@ -42,6 +42,7 @@
     <string name="view_longitude">Longitude:</string>
     <string name="view_latitude">Latitude:</string>
 
-
+    <string name="send_success">Message Sent!</string>
+    <string name="send_failure">Message failed to send!</string>
 
 </resources>

@@ -7,7 +7,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/view_user_name" />
+        android:text="@string/view_user_name"
+        android:labelFor="@+id/view_user_name"/>
 
     <TextView
         android:id="@+id/view_user_name"
@@ -17,7 +18,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/view_timestamp" />
+        android:text="@string/view_timestamp"
+        android:labelFor="@+id/view_timestamp"/>
 
     <TextView
         android:id="@+id/view_timestamp"

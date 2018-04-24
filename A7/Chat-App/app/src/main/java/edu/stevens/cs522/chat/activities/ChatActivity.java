@@ -1,7 +1,7 @@
 /*********************************************************************
 
     Chat server: accept chat messages from clients.
-    
+
     Sender chatName and GPS coordinates are encoded
     in the messages, and stripped off upon receipt.
 
@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -49,12 +50,12 @@ import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
 public class ChatActivity extends Activity implements OnClickListener, QueryBuilder.IQueryListener<ChatMessage>, ResultReceiverWrapper.IReceive {
 
 	final static public String TAG = ChatActivity.class.getCanonicalName();
-		
+
     /*
      * UI for displaying received messages
      */
 	private SimpleCursorAdapter messages;
-	
+
 	private ListView messageList;
 
     private SimpleCursorAdapter messagesAdapter;
@@ -82,9 +83,9 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
      * For receiving ack when message is sent.
      */
     private ResultReceiverWrapper sendResultReceiver;
-	
+
 	/*
-	 * Called when the activity is first created. 
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,21 +95,35 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
          * Initialize settings to default values.
          */
 		if (!Settings.isRegistered(this)) {
-			// TODO launch registration activity
+			// launch registration activity
+            Intent registerIntent = new Intent(this, RegisterActivity.class);
+            startActivity(registerIntent);
 
             return;
 		}
 
         setContentView(R.layout.messages);
 
-        // TODO use SimpleCursorAdapter to display the messages received.
+        // use SimpleCursorAdapter to display the messages received.
+        String[] from = {MessageContract.SENDER, MessageContract.MESSAGE_TEXT};
+        int[] to = {R.id.senderName, R.id.messageText};
+        messagesAdapter = new SimpleCursorAdapter(this, R.layout.message_with_sender, null, from, to);
 
-        // TODO create the message and peer managers, and initiate a query for all messages
+        messageList = (ListView) findViewById(R.id.message_list);
+        messageList.setAdapter(messagesAdapter);
+
+        // create the message and peer managers, and initiate a query for all messages
+        messageManager = new MessageManager(this);
+        peerManager = new PeerManager(this);
+        messageManager.getAllMessagesAsync(this);
 
         // TODO instantiate helper for service
 
-        // TODO initialize sendResultReceiver
+        // initialize sendResultReceiver
+        sendResultReceiver = new ResultReceiverWrapper(new Handler());
 
+        sendButton = (Button) findViewById(R.id.send_button);
+        sendButton.setOnClickListener(this);
     }
 
 	public void onResume() {
@@ -128,7 +143,9 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        // TODO inflate a menu with PEERS and SETTINGS options
+        // inflate a menu with PEERS and SETTINGS options
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chatserver_menu, menu);
 
         return true;
     }
@@ -138,18 +155,22 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         super.onOptionsItemSelected(item);
         switch(item.getItemId()) {
 
-            // TODO PEERS provide the UI for viewing list of peers
+            // PEERS provide the UI for viewing list of peers
             case R.id.peers:
+                Intent viewPeersIntent = new Intent(this, ViewPeersActivity.class);
+                startActivity(viewPeersIntent);
                 break;
 
-            // TODO PEERS provide the UI for registering
+            // REGISTER provide the UI for registering
             case R.id.register:
+                Intent registerIntent = new Intent(this, RegisterActivity.class);
+                startActivity(registerIntent);
                 break;
 
-            // TODO SETTINGS provide the UI for settings
+            // SETTINGS provide the UI for settings
             case R.id.settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 break;
 
             default:
@@ -183,24 +204,29 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
     @Override
     public void onReceiveResult(int resultCode, Bundle data) {
+        String text;
         switch (resultCode) {
             case RESULT_OK:
-                // TODO show a success toast message
+                // show a success toast message
+                text = getString(R.string.send_success);
                 break;
             default:
-                // TODO show a failure toast message
+                // show a failure toast message
+                text = getString(R.string.send_failure);
                 break;
         }
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
     public void handleResults(TypedCursor<ChatMessage> results) {
-        // TODO
+        messagesAdapter.swapCursor(results.getCursor());
     }
 
     @Override
     public void closeResults() {
-        // TODO
+        messagesAdapter.swapCursor(null);
     }
 
 }
