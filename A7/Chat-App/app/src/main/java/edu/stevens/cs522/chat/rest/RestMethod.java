@@ -5,7 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.PowerManager;
-import android.util.Config;
+import android.os.PowerManager.WakeLock;
 import android.util.JsonReader;
 import android.util.Log;
 
@@ -16,15 +16,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-
 import edu.stevens.cs522.chat.R;
+import edu.stevens.cs522.chat.settings.Settings;
 import edu.stevens.cs522.chat.util.StringUtils;
 
 /**
@@ -34,6 +32,8 @@ import edu.stevens.cs522.chat.util.StringUtils;
 public class RestMethod {
 
     public static final String TAG = RestMethod.class.getCanonicalName();
+
+    private static final boolean DEBUG = true;
 
     /*
      * Web service methods
@@ -88,12 +88,21 @@ public class RestMethod {
 
     private OutputStream uploadConnection;
 
+    private final String baseUri;
+
+    private URL registerUri;
+
+    private URL postMessageUri;
+
+    private URL syncMessagesUri;
+
     public RestMethod(Context context) {
         this.context = context;
+        this.baseUri = context.getResources().getString(R.string.base_uri);
     }
 
     public Response perform(RegisterRequest request) {
-        URL url = registerURL();
+        URL url = registerURL(request.chatname);
         if (url == null) {
             throw new IllegalStateException("Missing URL for registering!");
         }
@@ -132,12 +141,32 @@ public class RestMethod {
         }
     }
 
-    private URL registerURL() {
-        return null;  // TODO
+    private URL fromURI(String uri) {
+        try {
+            return new URL(uri);
+        } catch (MalformedURLException e) {
+            IllegalStateException ex = new IllegalStateException("Illegal state while attempting to register");
+            ex.initCause(e);
+            throw ex;
+        }
+    }
+
+    private URL registerURL(String chatName) {
+
+        if (registerUri == null) {
+            registerUri = fromURI(baseUri + "?chat-name=" + chatName);
+        }
+        return registerUri;
     }
 
     private URL postMessageURL() {
-        return null;  // TODO
+
+        if (postMessageUri == null) {
+            long senderId = Settings.getSenderId(context);
+            String uri = String.format("%s/%d/messages", baseUri, senderId);
+            postMessageUri = fromURI(uri);
+        }
+        return postMessageUri;
     }
 
     private PowerManager.WakeLock wakeLock;
@@ -254,7 +283,6 @@ public class RestMethod {
 		 * We do not expect a response entity, but there will still be response headers.
 		 */
         connection.setDoInput(false);
-        // connection.setDoOutput(true);
         connection.setRequestMethod(method);
         connection.setRequestProperty(CONTENT_TYPE, JSON_TYPE);
 
@@ -278,6 +306,88 @@ public class RestMethod {
         } else {
             connection.connect();
         }
+    }
+
+    /**
+     * For SYNC: callback from request processor for streaming upload to server
+     */
+    public interface StreamingOutput {
+        public void write(OutputStream os) throws IOException;
+    }
+
+    /**
+     * For SYNC: This is the response returned from a streaming download.  The request processor
+     * will read the streaming input (from the server) on the download stream, with HTTP response
+     * headers in the response field.  It is the responsibility of the request processor to
+     * disconnect from the server when done.
+     */
+    public class StreamingResponse {
+        private Response response;
+        public StreamingResponse(Response response) {
+            this.response = response;
+        }
+        public InputStream getInputStream() {
+            return downloadConnection;
+        }
+        public Response getResponse() {
+            return response;
+        }
+        public void disconnect() {
+            closeConnection();
+            releaseWakeLock();
+        }
+    }
+
+    private StreamingResponse executeStreamingRequest(String method, Request request, StreamingOutput out, WakeLock wakeLock) throws SocketTimeoutException, IOException {
+		/*
+		 * We will stream output to the server, so the connection will be returned to the request processor
+		 * to write any output entity, stream the output, and read any input response.
+		 *
+		 * "out" is a callback to stream
+		 */
+        if (DEBUG) Log.d(TAG, "....Executing a streaming request.....");
+        connection.setChunkedStreamingMode(0);
+        connection.setRequestMethod(method);
+
+        uploadConnection = connection.getOutputStream();
+
+        if (DEBUG) Log.d(TAG, "....No connection errors, writing output entity.....");
+        out.write(uploadConnection);
+        uploadConnection.flush();
+
+        if (DEBUG) Log.d(TAG, "....Checking the response code.....");
+        throwErrors(connection);
+
+        if (DEBUG) Log.d(TAG, "....Returning a streaming response.....");
+        downloadConnection = connection.getInputStream();
+
+        StreamingResponse response = new StreamingResponse(request.getResponse(connection));
+        return response;
+    }
+
+    private StreamingResponse executeStreamingRequest(Request request, StreamingOutput out, WakeLock wakeLock) throws SocketTimeoutException, IOException {
+        return executeStreamingRequest(POST_METHOD, request, out, wakeLock);
+    }
+
+    private StreamingResponse executeStreamingRequest(Request request, WakeLock wakeLock) throws SocketTimeoutException, IOException {
+		/*
+		 * We will stream output to the server, so the connection will be returned to the request processor
+		 * to write any output entity, stream the output, and read any input response.
+		 */
+        if (DEBUG) Log.d(TAG, "....Executing a streaming request.....");
+        connection.setChunkedStreamingMode(0);
+        connection.setRequestMethod(GET_METHOD);
+
+        connection.connect();
+
+        if (DEBUG) Log.d(TAG, "....Checking the response code.....");
+        throwErrors(connection);
+
+        if (DEBUG) Log.d(TAG, "....Returning a streaming response.....");
+        downloadConnection = connection.getInputStream();
+
+        StreamingResponse response = new StreamingResponse(request.getResponse(connection));
+        return response;
     }
 
     private String getErrorResponseMessage(HttpURLConnection connection) throws IOException {

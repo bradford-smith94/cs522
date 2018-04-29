@@ -12,6 +12,8 @@
 
     <!-- String literals in the UI -->
 
+    <string name="base_uri">http://127.0.0.1:8080/chat</string>
+
     <string name="message_edit_text">Type your message here.</string>
     <string name="send_label">SEND</string>
     <string name="register_label">REGISTER</string>
