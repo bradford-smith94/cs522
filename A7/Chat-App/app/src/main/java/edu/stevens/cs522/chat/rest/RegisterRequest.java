@@ -25,9 +25,7 @@ public class RegisterRequest extends Request {
 
     @Override
     public Map<String, String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
-        // TODO add headers
-        return headers;
+        return super.getRequestHeaders();
     }
 
     @Override
@@ -52,12 +50,13 @@ public class RegisterRequest extends Request {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // TODO
+        super.writeToParcel(dest, flags);
+        dest.writeString(chatname);
     }
 
     public RegisterRequest(Parcel in) {
         super(in);
-        // TODO
+        chatname = in.readString();
     }
 
     public static Creator<RegisterRequest> CREATOR = new Creator<RegisterRequest>() {

@@ -91,12 +91,28 @@ public abstract class Request implements Parcelable {
     }
 
     protected Request(Parcel in) {
-        // TODO assume tag has already been read, this will be called by subclass constructor
+        // assume tag has already been read, this will be called by subclass constructor
+        senderId = in.readLong();
+        status = StatusType.valueOf(in.readString());
+        clientID = (UUID) in.readSerializable();
+        version = in.readLong();
+        timestamp = new Date(in.readLong());
+        longitude = in.readDouble();
+        latitude = in.readDouble();
+        responseMessage = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        // TODO subclasses write tag, then call this, then write out their own fields
+        // subclasses write tag, then call this, then write out their own fields
+        out.writeLong(senderId);
+        out.writeString(status.name());
+        out.writeSerializable(clientID);
+        out.writeLong(version);
+        out.writeLong(timestamp.getTime());
+        out.writeDouble(longitude);
+        out.writeDouble(latitude);
+        out.writeString(responseMessage);
     }
 
     /*
