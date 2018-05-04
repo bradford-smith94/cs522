@@ -7,6 +7,9 @@ import android.os.ResultReceiver;
 import java.util.UUID;
 
 import edu.stevens.cs522.chat.settings.Settings;
+import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
+
+import static android.app.Activity.RESULT_CANCELED;
 
 
 /**
@@ -25,35 +28,48 @@ public class ChatHelper {
     // Installation senderId created when the app is installed (and provided with every request for sanity check)
     private UUID clientID;
 
-    public ChatHelper(Context context) {
+    private ResultReceiverWrapper receiver;
+
+    public ChatHelper(Context context, ResultReceiverWrapper receiver) {
         this.context = context;
         this.clientID = Settings.getClientId(context);
+        this.receiver = receiver;
     }
 
-    // TODO provide a result receiver that will update sender senderId (and add us to peer database)
+    // provide a result receiver that will update sender senderId (and add us to peer database)
     // and display a toast message upon completion
-    public void register (String chatName) {
+    public void register(String chatName) {
         this.senderId = Settings.getSenderId(context);
         if (senderId > 0) {
-            // TODO error we are already registered
+            // error we are already registered
+            if (receiver != null) {
+                receiver.send(RESULT_CANCELED, null);
+            }
             return;
         }
         if (chatName != null && !chatName.isEmpty()) {
             RegisterRequest request = new RegisterRequest(chatName, clientID);
             this.senderId = Settings.getSenderId(context);
             if (senderId > 0) {
-                // TODO error we are already registered
+                // error we are already registered
+                if (receiver != null) {
+                    receiver.send(RESULT_CANCELED, null);
+                }
+                return;
             }
             Settings.saveChatName(context, chatName);
             addRequest(request);
         }
     }
 
-    // TODO provide a result receiver that will display a toast message upon completion
-    public void postMessage (String chatRoom, String message) {
+    // provide a result receiver that will display a toast message upon completion
+    public void postMessage(String chatRoom, String message) {
         this.senderId = Settings.getSenderId(context);
         if (senderId <= 0) {
-            // TODO error we are not registered
+            // error we are not registered
+            if (receiver != null) {
+                receiver.send(RESULT_CANCELED, null);
+            }
             return;
         }
         if (message != null && !message.isEmpty()) {

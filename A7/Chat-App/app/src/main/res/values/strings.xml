@@ -47,4 +47,9 @@
     <string name="send_success">Message Sent!</string>
     <string name="send_failure">Message failed to send!</string>
 
+    <string name="register_success">Successfully registered!</string>
+    <string name="register_failed">Failed to register!</string>
+    <string name="username_taken">That username has been taken!</string>
+    <string name="already_registered">You are already registered!</string>
+
 </resources>

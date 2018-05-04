@@ -14,7 +14,7 @@ public class RegisterResponse extends Response {
 
     private final static String LOCATION = "Location";
 
-    private long senderId;
+    public long senderId;
 
     public RegisterResponse(HttpURLConnection connection) throws IOException {
         super(connection);
@@ -26,7 +26,9 @@ public class RegisterResponse extends Response {
     }
 
     @Override
-    public boolean isValid() { return true; }
+    public boolean isValid() {
+        return true;
+    }
 
     @Override
     public int describeContents() {
@@ -35,12 +37,13 @@ public class RegisterResponse extends Response {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // TODO
+        super.writeToParcel(dest, flags);
+        dest.writeLong(senderId);
     }
 
     public RegisterResponse(Parcel in) {
         super(in);
-        // TODO
+        senderId = in.readLong();
     }
 
     public static Creator<RegisterResponse> CREATOR = new Creator<RegisterResponse>() {
