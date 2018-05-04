@@ -115,12 +115,16 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
     public void onResume() {
         super.onResume();
-        sendResultReceiver.setReceiver(this);
+        if (sendResultReceiver != null) {
+            sendResultReceiver.setReceiver(this);
+        }
     }
 
     public void onPause() {
         super.onPause();
-        sendResultReceiver.setReceiver(null);
+        if (sendResultReceiver != null) {
+            sendResultReceiver.setReceiver(null);
+        }
     }
 
     public void onDestroy() {

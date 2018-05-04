@@ -28,6 +28,9 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".activities.RegisterActivity"
+            android:label="@string/title_activity_register" />
 
         <service
             android:name=".rest.RequestService"
