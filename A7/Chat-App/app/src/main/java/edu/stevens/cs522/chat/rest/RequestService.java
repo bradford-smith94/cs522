@@ -29,6 +29,7 @@ public class RequestService extends IntentService {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         processor = new RequestProcessor(this);
     }
 

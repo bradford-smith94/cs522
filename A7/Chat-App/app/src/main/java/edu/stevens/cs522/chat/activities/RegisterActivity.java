@@ -101,12 +101,8 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
     public void onClick(View v) {
         if (helper != null) {
 
-            String userName = null;
-
-            String message;
-
             // get userName from UI, and use helper to register
-            userName = userNameText.getText().toString().trim();
+            String userName = userNameText.getText().toString().trim();
             if (userName.equals("")) {
                 return;
             }
@@ -138,6 +134,9 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
                 break;
         }
         Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) {
+            finish();
+        }
     }
 
 }

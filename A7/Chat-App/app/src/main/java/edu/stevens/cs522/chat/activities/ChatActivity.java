@@ -83,8 +83,6 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
             // launch registration activity
             Intent registerIntent = new Intent(this, RegisterActivity.class);
             startActivity(registerIntent);
-
-            return;
         }
 
         setContentView(R.layout.messages);
