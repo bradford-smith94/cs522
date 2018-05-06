@@ -13,11 +13,11 @@ public class Settings {
 
     private static String SETTINGS = "settings";
 
-    private static String CLIENT_ID_KEY = "client-senderId";
+    public static String CLIENT_ID_KEY = "client-senderId";
 
     private static String SENDER_ID_KEY = "sender-senderId";
 
-    private static String CHAT_NAME_KEY = "user-name";
+    public static String CHAT_NAME_KEY = "user-name";
 
     public static UUID getClientId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE);
