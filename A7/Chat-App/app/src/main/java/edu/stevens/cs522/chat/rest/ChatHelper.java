@@ -58,7 +58,7 @@ public class ChatHelper {
                 return;
             }
             Settings.saveChatName(context, chatName);
-            addRequest(request);
+            addRequest(request, receiver);
         }
     }
 
@@ -77,7 +77,7 @@ public class ChatHelper {
                 chatRoom = DEFAULT_CHAT_ROOM;
             }
             PostMessageRequest request = new PostMessageRequest(senderId, clientID, chatRoom, message);
-            addRequest(request);
+            addRequest(request, receiver);
         }
     }
 
