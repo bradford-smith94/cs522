@@ -180,13 +180,7 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
             // get chatRoom and message from UI, and use helper to post a message
             chatRoom = chatRoomName.getText().toString().trim();
-            if (chatRoom.equals("")) {
-                chatRoom = ChatHelper.DEFAULT_CHAT_ROOM;
-            }
             message = messageText.getText().toString().trim();
-            if (message.equals("")) {
-                return;
-            }
 
             // add the message to the database
             helper.postMessage(chatRoom, message);

@@ -42,10 +42,10 @@ public class PostMessageRequest extends Request {
         JsonWriter jw = new JsonWriter(wr);
 
         // write a JSON message of the form:
-        // { "room" : <chat-room-name>, "message" : <message-text> }
+        // { "chatroom" : <chat-room-name>, "text" : <message-text> }
         jw.beginObject();
-        jw.name("room").value(chatRoom);
-        jw.name("message").value(message);
+        jw.name("chatroom").value(chatRoom);
+        jw.name("text").value(message);
         jw.endObject();
 
         return wr.toString();
