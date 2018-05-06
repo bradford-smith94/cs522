@@ -25,8 +25,6 @@ public class MessageContract extends BaseContract {
     public static final String CONTENT_PATH_ITEM = CONTENT_PATH(CONTENT_URI("#"));
 
 
-    public static final String ID = _ID;
-
     public static final String MESSAGE_TEXT = "message_text";
 
     public static final String TIMESTAMP = "timestamp";

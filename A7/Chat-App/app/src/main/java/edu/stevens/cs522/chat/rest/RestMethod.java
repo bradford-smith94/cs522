@@ -94,8 +94,6 @@ public class RestMethod {
 
     private URL postMessageUri;
 
-    private URL syncMessagesUri;
-
     public RestMethod(Context context) {
         this.context = context;
         this.baseUri = context.getResources().getString(R.string.base_uri);
@@ -185,6 +183,7 @@ public class RestMethod {
             wakeLock = null;
         }
     }
+
     /**
      * Build and return a user-agent string that can identify this application to remote servers. Contains the package
      * name and version code.
@@ -222,7 +221,7 @@ public class RestMethod {
      * Initialize some generic HTTP headers for the request.
      */
     private void initConnection(URL url, Request request) throws IOException {
-		/*
+        /*
 		 * Are we connected to a network?  Not the same as checking if the server is accessible....
 		 */
         checkOnline();
@@ -236,17 +235,17 @@ public class RestMethod {
         // Possible JB bug, don't pool connections: http://stackoverflow.com/q/20367647
         // connection.setRequestProperty(CONNECTION, "Keep-Alive");
         // connection.setRequestProperty(KEEP_ALIVE, "timeout="+keepAlive);
-        connection.setRequestProperty(CONNECTION,"Close");
+        connection.setRequestProperty(CONNECTION, "Close");
 
 		/*
 		 * App-specific headers
 		 */
-        Map<String,String> headers = request.getRequestHeaders();
-        for (Map.Entry<String,String> header : headers.entrySet()) {
+        Map<String, String> headers = request.getRequestHeaders();
+        for (Map.Entry<String, String> header : headers.entrySet()) {
             if (header.getValue() != null) {
                 connection.addRequestProperty(header.getKey(), header.getValue());
             } else {
-                Log.w(TAG, "Ignoring empty header value for "+header.getKey());
+                Log.w(TAG, "Ignoring empty header value for " + header.getKey());
             }
         }
 
@@ -270,7 +269,7 @@ public class RestMethod {
         downloadConnection = connection.getInputStream();
         JsonReader rd = new JsonReader(new BufferedReader(new InputStreamReader(downloadConnection)));
         Response response = request.getResponse(connection, rd);
-        // rd.close(); TODO close connection?
+        // rd.close(); close connection?
         return response;
     }
 
@@ -323,15 +322,19 @@ public class RestMethod {
      */
     public class StreamingResponse {
         private Response response;
+
         public StreamingResponse(Response response) {
             this.response = response;
         }
+
         public InputStream getInputStream() {
             return downloadConnection;
         }
+
         public Response getResponse() {
             return response;
         }
+
         public void disconnect() {
             closeConnection();
             releaseWakeLock();
@@ -351,7 +354,8 @@ public class RestMethod {
 
         uploadConnection = connection.getOutputStream();
 
-        if (DEBUG) Log.d(TAG, "....No connection errors, writing output entity.....");
+        if (DEBUG)
+            Log.d(TAG, "....No connection errors, writing output entity.....");
         out.write(uploadConnection);
         uploadConnection.flush();
 
@@ -398,17 +402,17 @@ public class RestMethod {
                 + connection.getURL();
         sb.append(exceptionMessage);
         try {
-            InputStream es = ((HttpURLConnection)connection).getErrorStream();
+            InputStream es = ((HttpURLConnection) connection).getErrorStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(es, StringUtils.CHARSET));
             String line = rd.readLine();
             while (line != null) {
-                Log.w(TAG, "Error response entity: "+line);
+                Log.w(TAG, "Error response entity: " + line);
                 sb.append(line);
                 sb.append('\n');
                 line = rd.readLine();
             }
             rd.close();
-        } catch(IOException ex) {
+        } catch (IOException ex) {
             Log.e(TAG, "IO Exception while processing error response.", ex);
         }
         return sb.toString();

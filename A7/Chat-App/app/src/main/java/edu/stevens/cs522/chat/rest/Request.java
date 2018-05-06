@@ -1,5 +1,6 @@
 package edu.stevens.cs522.chat.rest;
 
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.JsonReader;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import edu.stevens.cs522.chat.R;
 import edu.stevens.cs522.chat.util.DateUtils;
 import edu.stevens.cs522.chat.util.EnumUtils;
 
