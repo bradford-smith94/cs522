@@ -44,7 +44,7 @@ public class RequestProcessor {
         Response response = restMethod.perform(request);
         if (response instanceof RegisterResponse) {
             // update the sender senderId in settings, updated peer record PK
-            Settings.saveSenderId(context, ((RegisterResponse)response).senderId);
+            Settings.saveSenderId(context, ((RegisterResponse) response).senderId);
         }
         return response;
     }
