@@ -25,7 +25,7 @@ public class SynchronizeRequest extends Request {
     }
 
     @Override
-    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException{
+    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException {
         assert rd == null;
         return new SynchronizeResponse(connection);
     }
@@ -42,6 +42,7 @@ public class SynchronizeRequest extends Request {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeLong(senderId);
         dest.writeString(clientID.toString());
     }
@@ -49,6 +50,7 @@ public class SynchronizeRequest extends Request {
     public SynchronizeRequest(long senderId, UUID clientID) {
         super(senderId, clientID);
     }
+
     public SynchronizeRequest(long senderId, UUID clientID, ChatMessage message) {
         super(senderId, clientID);
 //        this.message = message;
@@ -56,7 +58,8 @@ public class SynchronizeRequest extends Request {
 
     public SynchronizeRequest(Parcel in) {
         super(in);
-        // TODO
+        senderId = in.readLong();
+        clientID = UUID.fromString(in.readString());
     }
 
     public static Creator<SynchronizeRequest> CREATOR = new Creator<SynchronizeRequest>() {

@@ -1,7 +1,7 @@
 /*********************************************************************
 
     Chat server: accept chat messages from clients.
-    
+
     Sender chatName and GPS coordinates are encoded
     in the messages, and stripped off upon receipt.
 
@@ -31,7 +31,7 @@ import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
 public class RegisterActivity extends Activity implements OnClickListener, ResultReceiverWrapper.IReceive {
 
 	final static public String TAG = RegisterActivity.class.getCanonicalName();
-		
+
     /*
      * Widgets for dest address, message text, send button.
      */
@@ -50,9 +50,9 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
      * For receiving ack when registered.
      */
     private ResultReceiverWrapper registerResultReceiver;
-	
+
 	/*
-	 * Called when the activity is first created. 
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -68,13 +68,13 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
 
         setContentView(R.layout.register);
 
-        // TODO instantiate helper for service
+        // instantiate helper for service
         helper = new ChatHelper(this);
 
-        // TODO initialize registerResultReceiver
+        // initialize registerResultReceiver
         registerResultReceiver = new ResultReceiverWrapper(new Handler());
 
-        // TODO get references to views
+        // get references to views
 
         clientIdText = (TextView) findViewById(R.id.client_id_text);
         clientIdText.setText(Settings.getClientId(this).toString());
@@ -110,15 +110,13 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
 
             String serverUri;
 
-            // TODO get userName from UI, and use helper to register
+            // get userName from UI, and use helper to register
 
             userName = userNameText.getText().toString();
 
             helper.register(userName, registerResultReceiver);
 
             Settings.saveChatName(this, userName);
-
-            // End todo
 
             Log.i(TAG, "Registered: " + userName);
 
@@ -129,14 +127,23 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
 
     @Override
     public void onReceiveResult(int resultCode, Bundle data) {
+        String text;
         switch (resultCode) {
             case RESULT_OK:
-                // TODO show a success toast message
-                Toast.makeText(this, "Registered!", Toast.LENGTH_LONG).show();
+                // show a success toast message
+                text = getString(R.string.register_success);
+                break;
+            case RESULT_CANCELED:
+                text = getString(R.string.already_registered);
                 break;
             default:
-                // TODO show a failure toast message
+                // show a failure toast message
+                text = getString(R.string.register_failed);
                 break;
+        }
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) {
+            finish();
         }
     }
 

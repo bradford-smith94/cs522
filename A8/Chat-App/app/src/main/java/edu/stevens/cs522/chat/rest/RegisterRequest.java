@@ -24,9 +24,7 @@ public class RegisterRequest extends Request {
 
     @Override
     public Map<String, String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
-        // TODO add headers
-        return headers;
+        return super.getRequestHeaders();
     }
 
     @Override
@@ -35,7 +33,7 @@ public class RegisterRequest extends Request {
     }
 
     @Override
-    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException{
+    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException {
         return new RegisterResponse(connection);
     }
 

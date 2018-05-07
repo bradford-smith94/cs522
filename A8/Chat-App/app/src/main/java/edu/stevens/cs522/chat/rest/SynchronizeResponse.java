@@ -18,7 +18,9 @@ public class SynchronizeResponse extends Response {
     }
 
     @Override
-    public boolean isValid() { return true; }
+    public boolean isValid() {
+        return true;
+    }
 
     @Override
     public int describeContents() {
@@ -27,12 +29,11 @@ public class SynchronizeResponse extends Response {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // TODO
+        super.writeToParcel(dest, flags);
     }
 
     public SynchronizeResponse(Parcel in) {
         super(in);
-        // TODO
     }
 
     public static Creator<SynchronizeResponse> CREATOR = new Creator<SynchronizeResponse>() {

@@ -296,7 +296,7 @@ public class RestMethod {
         downloadConnection = connection.getInputStream();
         JsonReader rd = new JsonReader(new BufferedReader(new InputStreamReader(downloadConnection)));
         Response response = request.getResponse(connection, rd);
-        // rd.close(); TODO close connection?
+        // rd.close(); close connection?
         return response;
     }
 

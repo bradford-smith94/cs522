@@ -27,9 +27,11 @@ public abstract class Request implements Parcelable {
         POST_MESSAGE("Post Message"),
         SYNCHRONIZE("Synchronize");
         private String value;
+
         private RequestType(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
@@ -41,9 +43,11 @@ public abstract class Request implements Parcelable {
         FAILED("Failed"),
         COMPLETED("Completed");
         private String value;
+
         private StatusType(String value) {
             this.value = value;
         }
+
         public String getValue() {
             return value;
         }
@@ -92,12 +96,28 @@ public abstract class Request implements Parcelable {
     }
 
     protected Request(Parcel in) {
-        // TODO assume tag has already been read, this will be called by subclass constructor
+        // assume tag has already been read, this will be called by subclass constructor
+        senderId = in.readLong();
+        status = StatusType.valueOf(in.readString());
+        clientID = (UUID) in.readSerializable();
+        version = in.readLong();
+        timestamp = new Date(in.readLong());
+        longitude = in.readDouble();
+        latitude = in.readDouble();
+        responseMessage = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        // TODO subclasses write tag, then call this, then write out their own fields
+        // subclasses write tag, then call this, then write out their own fields
+        out.writeLong(senderId);
+        out.writeString(status.name());
+        out.writeSerializable(clientID);
+        out.writeLong(version);
+        out.writeLong(timestamp.getTime());
+        out.writeDouble(longitude);
+        out.writeDouble(latitude);
+        out.writeString(responseMessage);
     }
 
     /*
@@ -112,8 +132,8 @@ public abstract class Request implements Parcelable {
     public static String LATITUDE_HEADER = "X-Latitude";
 
     // App-specific HTTP request headers.
-    public Map<String,String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
+    public Map<String, String> getRequestHeaders() {
+        Map<String, String> headers = new HashMap<>();
         headers.put(CLIENT_ID_HEADER, clientID.toString());
         headers.put(TIMESTAMP_HEADER, Long.toString(timestamp.getTime()));
         headers.put(LONGITUDE_HEADER, Double.toString(longitude));
@@ -151,7 +171,7 @@ public abstract class Request implements Parcelable {
             default:
                 break;
         }
-        throw new IllegalArgumentException("Unknown request type: "+requestType.name());
+        throw new IllegalArgumentException("Unknown request type: " + requestType.name());
     }
 
     public static final Parcelable.Creator<Request> CREATOR = new Parcelable.Creator<Request>() {

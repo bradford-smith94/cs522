@@ -14,12 +14,11 @@ public class RegisterResponse extends Response {
 
     private final static String LOCATION = "Location";
 
-    private long senderId;
+    public long senderId;
 
     public RegisterResponse(HttpURLConnection connection) throws IOException {
         super(connection);
-        // TODO String location = connection.getHeaderField(LOCATION);
-        String location = null;
+        String location = connection.getHeaderField(LOCATION);
         if (location != null) {
             Uri uri = Uri.parse(location);
             senderId = Long.parseLong((uri.getLastPathSegment()));
@@ -27,7 +26,9 @@ public class RegisterResponse extends Response {
     }
 
     @Override
-    public boolean isValid() { return true; }
+    public boolean isValid() {
+        return true;
+    }
 
     @Override
     public int describeContents() {

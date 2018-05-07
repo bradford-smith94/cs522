@@ -33,13 +33,13 @@ public class ChatHelper {
         this.clientID = Settings.getClientId(context);
     }
 
-    public void register (String chatName, ResultReceiver resultReceiver) {
+    public void register(String chatName, ResultReceiver resultReceiver) {
         if (Settings.isRegistered(context)) {
             Toast.makeText(context, R.string.already_registered, Toast.LENGTH_LONG).show();
             return;
         }
         if (chatName != null && !chatName.isEmpty()) {
-            // TODO save the chat name and add a registration request to the request queue
+            // save the chat name and add a registration request to the request queue
             Settings.saveChatName(context, chatName);
             RegisterRequest request = new RegisterRequest(chatName, clientID);
             addRequest(request, resultReceiver);
@@ -51,7 +51,7 @@ public class ChatHelper {
             if (chatRoom == null || chatRoom.isEmpty()) {
                 chatRoom = DEFAULT_CHAT_ROOM;
             }
-            // TODO provide a result receiver that will display a toast message upon completion
+            // provide a result receiver that will display a toast message upon completion
             PostMessageRequest request = new PostMessageRequest(Settings.getSenderId(context), Settings.getClientId(context), chatRoom, text);
             addRequest(request, receiver);
         }

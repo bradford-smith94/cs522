@@ -35,22 +35,26 @@ public class PostMessageRequest extends Request {
 
     @Override
     public Map<String, String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
-        // TODO
-        return headers;
+        return super.getRequestHeaders();
     }
 
     @Override
     public String getRequestEntity() throws IOException {
         StringWriter wr = new StringWriter();
         JsonWriter jw = new JsonWriter(wr);
-        // TODO write a JSON message of the form:
-        // { "room" : <chat-room-name>, "message" : <message-text> }
-        return null;
+
+        // write a JSON message of the form:
+        // { "chatroom" : <chat-room-name>, "text" : <message-text> }
+        jw.beginObject();
+        jw.name("chatroom").value(chatRoom);
+        jw.name("text").value(message);
+        jw.endObject();
+
+        return wr.toString();
     }
 
     @Override
-    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException{
+    public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException {
         return new PostMessageResponse(connection);
     }
 
@@ -70,12 +74,15 @@ public class PostMessageRequest extends Request {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // TODO
+        super.writeToParcel(dest, flags);
+        dest.writeString(chatRoom);
+        dest.writeString(message);
     }
 
     public PostMessageRequest(Parcel in) {
         super(in);
-        // TODO
+        chatRoom = in.readString();
+        message = in.readString();
     }
 
     public static Creator<PostMessageRequest> CREATOR = new Creator<PostMessageRequest>() {

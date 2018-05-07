@@ -3,8 +3,13 @@ package edu.stevens.cs522.chat.rest;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
+
+import edu.stevens.cs522.chat.activities.RegisterActivity;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -36,9 +41,12 @@ public class RequestService extends IntentService {
         ResultReceiver receiver = intent.getParcelableExtra(RESULT_RECEIVER_KEY);
 
         Response response = processor.process(request);
+        Bundle responseBundle = new Bundle();
+        responseBundle.putParcelable(RegisterActivity.TAG, response);
 
         if (receiver != null) {
-            // TODO use receiver to call back to activity
+            // use receiver to call back to activity
+            receiver.send(RESULT_OK, responseBundle);
 
         } else {
             Log.i(TAG, "Missing receiver");
